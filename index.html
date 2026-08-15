@@ -2302,7 +2302,39 @@ $('#adres-konum').addEventListener('click', ev => {
   btn.textContent = 'Konum aranıyor…';
   adresKonumDurum('Konumunuz aranıyor. Tarayıcı izin isterse "İzin ver" deyin.', '');
 
-  const bitir = () => { btn.disabled = false; btn.textContent = eskiMetin; };
+  /* Düğme yalnızca bir kez eski hâline dönsün. Bazı tarayıcılarda izin
+   * istemi kapatılmadan hiçbir geri çağırım çalışmıyor; emniyet zamanlayıcısı
+   * olmazsa düğme sonsuza kadar devre dışı kalıyor ve "çalışmıyor" görünüyor. */
+  let bitti = false;
+  const bitir = () => {
+    if (bitti) return;
+    bitti = true;
+    clearTimeout(emniyet);
+    btn.disabled = false;
+    btn.textContent = eskiMetin;
+  };
+  const emniyet = setTimeout(() => {
+    if (bitti) return;
+    bitir();
+    adresKonumDurum(
+      'Konum yanıtı gelmedi. Tarayıcı izin istemini gösterdiyse yanıtlayın, '
+      + 'ya da ilçeyi listeden seçin.', 'hata');
+  }, 25000);
+
+  /* İzin daha önce reddedildiyse tarayıcı istemi bir daha göstermez ve
+   * getCurrentPosition sessizce hataya düşer. Bunu önden söylemek, düğmenin
+   * "hiçbir şey yapmıyor" gibi görünmesini engelliyor. */
+  if (navigator.permissions && navigator.permissions.query) {
+    navigator.permissions.query({ name: 'geolocation' }).then(izin => {
+      if (izin.state === 'denied' && !bitti) {
+        bitir();
+        adresKonumDurum(
+          'Bu site için konum izni daha önce reddedilmiş, bu yüzden tarayıcı '
+          + 'artık sormuyor. Adres çubuğundaki kilit simgesinden izni açabilir '
+          + 'ya da ilçeyi listeden seçebilirsiniz.', 'hata');
+      }
+    }).catch(() => {});
+  }
 
   navigator.geolocation.getCurrentPosition(
     konum => {
