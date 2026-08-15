@@ -1,4 +1,6 @@
-# Bina Güvenliği (depremlab)
+# Deprem Rehberim
+
+Depreme hazırlık veri ile değil, eylemle başlar.
 
 İstanbul için deprem hazırlığı değerlendirme aracı. İki bağımsız modül ve
 bunları birleştiren bir hazırlık planı sunar:
@@ -140,17 +142,56 @@ Katmanlı keşif haritası ayrı bir sayfadır ve bu değerlendirme akışının
 parçası değildir. Genel bilgi amaçlıdır. Kendi Leaflet bağımlılığını
 kullanır; değerlendirme sihirbazı harita veya konum servisi kullanmaz.
 
-## Doğrulama
+## Temalar
 
-İki takım vardır ve ikisi de bu depoda değil, geliştirme sırasında
-üretilmiştir:
+İki tema vardır, üst bardaki **Tema** düğmesiyle değişir:
 
-- Kabul kriterleri (brief §22) için Node tabanlı statik denetim — 64 kontrol.
-- Headless Chromium ile uçtan uca akış denetimi — 45 kontrol; 375, 768, 1024
-  ve 1440 piksel genişliklerinde yatay kaydırma, dokunma hedefi boyutu, form
-  etiketleri, depolama kullanımı ve dış istekler dahil.
+- **sade** (varsayılan) — ürünün sunum destesinden alınan palet: zemin
+  `#f5f7fa`, kart `#ffffff`, lacivert `#1a2e4a`, turuncu vurgu `#e8762c`,
+  mavi `#1a4a9a`.
+- **canli** — daha canlı alternatif: mercan `#ff4f40`, nane `#f2f8f3`,
+  yuvarlak hatlar.
 
-Son çalıştırmada ikisi de tam geçti.
+Tema seçimi bellekte tutulur, hiçbir yere yazılmaz; sayfa yenilenince
+varsayılana döner. Her iki temada da sonuç durumları renkten bağımsız olarak
+simge, etiket ve açıklamayla ayırt edilir.
+
+## PDF raporu
+
+Her iki rapor ekranında "PDF olarak indir" düğmesi vardır. Ek bir kütüphane
+kullanılmaz; `window.print()` ve bir yazdırma stil sayfası ile çalışır.
+Çıktıda yalnızca açık olan rapor basılır — üst bar, düğmeler ve gezinme
+basılmaz. Tarayıcının "PDF olarak kaydet" seçeneğiyle dosya alınır.
+Çevrimdışı çalışır.
+
+## Kentsel dönüşüm yönlendirmesi
+
+Bina raporu, 6306 sayılı Kanun kapsamındaki sürecin nasıl işlediğini anlatan
+bir bölüm içerir: başvurunun nereye yapıldığı, tek kat malikinin çoğunluk
+onayı olmadan başlatabildiği, masrafın kime ait olduğu, sonucun bildirimi ve
+itiraz yolu.
+
+Bu bölüm **bilgilendirmedir, yönlendirme değildir**. Uygulama hiçbir
+kullanıcıya "kentsel dönüşüme girin", "binayı yıkın" veya "güçlendirme yapın"
+demez — bir anket binanın riskli yapı olup olmadığını belirleyemez. Oran, süre
+ve hak iddiaları yazılmaz; 6306 uygulama yönetmeliği en son 4 Şubat 2026'da
+değiştiği için kullanıcı resmî kaynağa yönlendirilir.
+
+## Test
+
+```bash
+npm install                 # playwright
+npx playwright install chromium
+npm test                    # build + statik + uçtan uca
+```
+
+- `tests/verify.js` — kabul kriterleri ve ürün kuralları, statik denetim
+- `tests/e2e.js` — headless Chromium ile tam akış; 375/768/1024/1440 piksel,
+  dokunma hedefi, form etiketleri, depolama kullanımı, dış istekler
+- `tests/shots.js` — her ekranın görüntüsünü alır
+
+`.github/workflows/ci.yml` her push'ta bunları çalıştırır ve `index.html`'in
+kaynaklarla güncel olduğunu doğrular.
 
 ## Üretim öncesi değiştirilmesi gerekenler
 

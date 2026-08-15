@@ -18,22 +18,22 @@ ROOT = Path(__file__).resolve().parent.parent
 S = Path(__file__).resolve().parent
 
 ISKELET = """<!DOCTYPE html>
-<html lang="tr">
+<html lang="tr" data-tema="sade">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>depremlab — Eviniz depreme ne kadar hazır?</title>
-<meta name="description" content="İstanbul için konum, zemin, fay uzaklığı ve bina bilgisiyle deprem risk değerlendirmesi. Açık veriye dayanır, hiçbir bilgi kaydedilmez.">
+<title>Deprem Rehberim — Depreme ne kadar hazırsın?</title>
+<meta name="description" content="Depreme hazırlık veri ile değil, eylemle başlar. Binanı anla, evini hazırla, sonraki adımını belirle. Kayıt gerekmez, hiçbir bilgi kaydedilmez.">
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#faf7f1">
+<meta name="theme-color" content="#f5f7fa">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="depremlab">
+<meta name="apple-mobile-web-app-title" content="Deprem Rehberim">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" href="icons/icon-192.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0&family=Inter:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap">
 <style>
 __STIL__
 </style>

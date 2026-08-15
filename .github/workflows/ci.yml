@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Bağımlılıkları kur
+        run: npm ci || npm install
+
+      - name: Chromium indir
+        run: npx playwright install --with-deps chromium
+
+      - name: index.html üret
+        run: python3 scripts/build_app.py
+
+      # Üretilen index.html depoya işlenmiş olanla aynı olmalı; değilse
+      # biri kaynağı değiştirip build almayı unutmuş demektir.
+      - name: Build çıktısı güncel mi
+        run: |
+          if ! git diff --quiet -- index.html; then
+            echo "::error::index.html kaynaklarla uyumsuz. 'python3 scripts/build_app.py' çalıştırıp sonucu commit'leyin."
+            git diff --stat -- index.html
+            exit 1
+          fi
+
+      - name: Kabul kriterleri (statik)
+        run: node tests/verify.js
+
+      - name: Uçtan uca (headless Chromium)
+        run: node tests/e2e.js
+
+      - name: Başarısızlıkta ekran görüntüleri
+        if: failure()
+        run: node tests/shots.js || true
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: ekran-goruntuleri
+          path: tests/shots/
+          retention-days: 7
+          if-no-files-found: ignore

@@ -330,24 +330,51 @@ function bolgeselBaglam(D, ilceAdi) {
   const zeminNit = zeminNiteligi(ilce.vs30);
   const fayNit = fayNiteligi(ilce.fay_km);
 
+  /* Açık alan: ilçedeki açık/yeşil alan ÷ senaryo geçici barınma ihtiyacı.
+   * Çıplak sayı kullanıcıya bir şey anlatmıyor; yorumunu da veriyoruz.
+   * Rakam alt sınırdır — okul bahçesi, ilçe parkları, kampüsler envanterde yok. */
+  let acikAlan;
+  if (ilce.m2kisi == null) {
+    acikAlan = { deger: 'veri yok', metin: 'Bu ilçe için açık alan hesabı yapılamadı.' };
+  } else {
+    const dar = ilce.m2kisi < 15;
+    acikAlan = {
+      deger: `kişi başına ${ilce.m2kisi} m²`,
+      metin: (dar
+        ? 'Senaryo sonrası barınma ihtiyacına göre açık alan dar görünüyor. '
+        : 'Senaryo sonrası barınma ihtiyacına göre açık alan görece geniş görünüyor. ')
+        + 'Bu rakam alt sınırdır: okul bahçeleri, ilçe parkları ve kampüsler '
+        + 'envantere dahil değildir.',
+    };
+  }
+
   return {
     konumEtiketi: ilceAdi,
     veriDurumu: 'mevcut',
     nitelikselBaglam: [
-      { baslik: 'Zemin niteliği', metin: zeminNit.metin },
-      { baslik: 'Fay yakınlığı', metin: fayNit.metin },
       {
-        baslik: 'Açık alan',
-        metin: ilce.yesil_ha && ilce.m2kisi
-          ? `Bu ilçede senaryo barınma ihtiyacına göre ${ilce.m2kisi} m² açık alan düşüyor.`
-          : 'Açık alan bilgisi yok.',
+        baslik: 'Zemin niteliği',
+        deger: ilce.vs30 == null ? 'veri yok' : `Vs30 ≈ ${Math.round(ilce.vs30)} m/s`,
+        metin: zeminNit.metin,
       },
+      {
+        baslik: 'Fay yakınlığı',
+        deger: `${ilce.fay_km.toFixed(1)} km — ${ilce.fay_ad || 'en yakın bilinen fay'}`,
+        metin: fayNit.metin,
+      },
+      { baslik: 'Açık alan', deger: acikAlan.deger, metin: acikAlan.metin },
     ],
-    veriTarihi: '2024–2026',
-    kaynak: 'Demo veri (İBB deprem senaryosu, USGS Vs30, Kandilli Fay Veritabanı)',
+    /* Kaynaklar gerçektir; "demo" diye etiketlemek yanlış beyan olurdu.
+     * Prototip olan, bu veriden değil anketten türetilen yapısal sonuçtur. */
+    veriTarihi: 'Vs30 ve fay verisi: güncel yayın · Deprem kaydı: 1905–2025 · '
+              + 'İBB senaryo sonuçları: 2019 Mw 7.5 Marmara senaryosu',
+    kaynak: 'USGS Global Vs30 Mosaic · Türkiye diri fay verisi · USGS FDSN deprem '
+          + 'kataloğu · İBB açık veri (deprem senaryosu, yeşil alan envanteri) · '
+          + 'OpenStreetMap',
     sinirlar: [
-      'Bu bilgiler ilçe ölçeğindedir.',
-      'Binanızın zeminini veya deprem performansını göstermez.',
+      'Bu bilgiler ilçe ölçeğindedir; sokağınızı veya binanızı temsil etmez.',
+      'Zemin verisi yaklaşık 926 metrelik hücrelerden okunur, saha etüdü değildir.',
+      'Senaryo sonuçları olasılıklıdır; tek bir bina için tahmin üretmez.',
       'Bölgesel tehlike ile binanın yapısal performansı aynı şey değildir.',
     ],
   };
@@ -414,6 +441,82 @@ function birlesikOzet(yapisalSonuc, evDurumu) {
 
 const OZET_DESTEK = 'Sonraki adımları küçük küçük tamamlamak, hiçbir şey yapmamaktan daha değerlidir.';
 
+/* --------------------------------------------- kentsel dönüşüm yolu */
+
+/* Kullanıcı, binası hakkında bir şey öğrendikten sonra "peki şimdi ne
+ * yapacağım" diye kalıyor. Bu blok resmî süreci tarif eder.
+ *
+ * Bilinçli olarak YÖNLENDİRME değil BİLGİLENDİRME: bu uygulamanın anketi
+ * bir binanın riskli olup olmadığını belirleyemez, dolayısıyla kimseye
+ * "dönüşüme girin" denmez. Söylenen şey, sürecin nasıl işlediği ve ilk
+ * adımın nerede atıldığı.
+ *
+ * Yasal ayrıntı vermekten kaçınılır: 6306 uygulama yönetmeliği en son
+ * 4 Şubat 2026'da değişti. Oran, süre ve hak iddiaları burada yazılmaz;
+ * kullanıcı resmî kaynağa gönderilir.
+ */
+const KENTSEL_DONUSUM = {
+  baslik: 'Kentsel dönüşüm süreci nasıl işliyor?',
+  giris: 'Binanızın durumunu resmî olarak öğrenmek ve dönüşüm sürecine '
+       + 'başlamak 6306 sayılı Kanun kapsamında yürür. Aşağıdakiler sürecin '
+       + 'genel işleyişidir.',
+  adimlar: [
+    {
+      no: 1,
+      baslik: 'Riskli yapı tespiti başvurusu',
+      metin: 'Başvuru, Çevre, Şehircilik ve İklim Değişikliği Bakanlığı '
+           + 'tarafından lisanslandırılmış kurum ve kuruluşlara yapılır. '
+           + 'Binanızın bulunduğu ildeki lisanslı kuruluşların güncel '
+           + 'listesini Bakanlıktan öğrenebilirsiniz.',
+    },
+    {
+      no: 2,
+      baslik: 'Tek malik de başlatabilir',
+      metin: 'Tespit başvurusu için kat maliklerinin çoğunluğunun onayı '
+           + 'aranmaz; maliklerden birinin veya kanuni temsilcisinin '
+           + 'başvurusu yeterlidir. Komşularınızı ikna etmeyi beklemeden '
+           + 'süreci başlatabilirsiniz.',
+    },
+    {
+      no: 3,
+      baslik: 'Masraf ve inceleme',
+      metin: 'Tespit masrafı başvuranca karşılanır. Lisanslı kuruluş binada '
+           + 'yerinde inceleme yapar; beton ve donatı üzerinden ölçüm alınır. '
+           + 'Bu, bir anketin veremeyeceği tek gerçek sonuçtur.',
+    },
+    {
+      no: 4,
+      baslik: 'Sonuç, bildirim ve itiraz',
+      metin: 'Tespit sonucu ilgili müdürlüğe bildirilir ve binanın tapu '
+           + 'kaydına işlenir. Sonuca itiraz yolu açıktır. İtiraz süreleri ve '
+           + 'usulü mevzuatta belirlidir; güncel hâlini resmî kaynaktan '
+           + 'doğrulayın.',
+    },
+    {
+      no: 5,
+      baslik: 'Riskli çıkarsa',
+      metin: 'Yıkım, güçlendirme ve yeniden yapım seçenekleri ile kira '
+           + 'yardımı gibi destekler bu aşamada gündeme gelir. Hangi '
+           + 'seçeneğin uygun olduğu ve malikler arasındaki karar usulü '
+           + 'mevzuata tabidir; bir hukukçuya danışmanız yerinde olur.',
+    },
+  ],
+  nereden: [
+    { ad: 'Çevre, Şehircilik ve İklim Değişikliği Bakanlığı',
+      not: 'Lisanslı kuruluş listesi ve güncel mevzuat metni.' },
+    { ad: 'e-Devlet',
+      not: 'Binanıza ait mevcut riskli yapı kaydını sorgulayabilirsiniz.' },
+    { ad: 'Belediyenizin imar müdürlüğü',
+      not: 'Yapı ruhsatı tarihi ve bina dosyası için.' },
+  ],
+  uyari: 'Bu bölüm genel bilgilendirmedir, hukuki danışmanlık değildir. '
+       + '6306 sayılı Kanun\'un uygulama yönetmeliği en son 4 Şubat 2026\'da '
+       + 'değişmiştir; başvuru öncesi güncel metni resmî kaynaktan doğrulayın.',
+  sinir: 'Bu uygulamadaki değerlendirme binanızın riskli yapı olup olmadığını '
+       + 'belirleyemez. Bunu yalnızca lisanslı bir kuruluşun yerinde yapacağı '
+       + 'inceleme belirler.',
+};
+
 if (typeof module !== 'undefined') {
   module.exports = {
     kis, vs30Oku, mesafeKm, cizgiyeMesafe, enYakinFay, noktaHalkada, ilceBul,
@@ -421,6 +524,7 @@ if (typeof module !== 'undefined') {
     fayNiteligi, deriveDemoStructuralPriority, ilceListesi, ilceBilgisi,
     bolgeselBaglam, YAPISAL_SINIR_METNI, SOYLEYEMEYECEKLERIMIZ,
     DEGERLENDIRME_SECENEKLERI, DEGERLENDIRME_SECENEK_NOTU, BOLGESEL_UYARI,
+    KENTSEL_DONUSUM,
     BOLGESEL_KAPSAM, birlesikOzet, OZET_DESTEK,
   };
 }

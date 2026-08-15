@@ -1,20 +1,20 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="tr" data-tema="sade">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>depremlab — Eviniz depreme ne kadar hazır?</title>
-<meta name="description" content="İstanbul için konum, zemin, fay uzaklığı ve bina bilgisiyle deprem risk değerlendirmesi. Açık veriye dayanır, hiçbir bilgi kaydedilmez.">
+<title>Deprem Rehberim — Depreme ne kadar hazırsın?</title>
+<meta name="description" content="Depreme hazırlık veri ile değil, eylemle başlar. Binanı anla, evini hazırla, sonraki adımını belirle. Kayıt gerekmez, hiçbir bilgi kaydedilmez.">
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#faf7f1">
+<meta name="theme-color" content="#f5f7fa">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="depremlab">
+<meta name="apple-mobile-web-app-title" content="Deprem Rehberim">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" href="icons/icon-192.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0&family=Inter:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap">
 <style>
 /* Hallmark · macrostructure: Narrative Workflow · genre: editorial
  * theme: Almanac (light paper · roman-serif display · terracotta accent)
@@ -56,8 +56,8 @@
   --color-toplanma:   oklch(48% 0.14 150);
 
   /* --- tipografi --- */
-  --font-display: 'Instrument Serif', 'Iowan Old Style', Georgia, serif;
-  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-body: Arial, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-mono: ui-monospace, 'SF Mono', Menlo, monospace;
 
   /* 60-65 yaş için taban 19px; ölçek buradan büyür */
@@ -100,6 +100,57 @@
   --tap: 56px;
 }
 
+/* ================================================================ TEMA */
+[data-tema="sade"] {
+  /* V2: Deck Paleti — Deprem Rehberim */
+  --color-paper:      #f5f7fa;
+  --color-paper-2:    #ffffff;
+  --color-paper-3:    #e8eff8;
+  --color-ink:        #1a2e4a;
+  --color-ink-2:      #1a2e4a;
+  --color-ink-3:      #4a5a6a;
+  --color-rule:       #d0d4d8;
+  --color-accent:     #e8762c;
+  --color-accent-2:   #fff3e0;
+  --color-focus:      #1a4a9a;
+  /* Durum renkleri — her iki temada ayırt edilebilir, renk tek başına bilgi taşımaz */
+  --color-guvenli:    #4a9a3a;
+  --color-guvenli-bg: #e8f5e0;
+  --color-az:         #e8a00c;
+  --color-az-bg:      #fff8e0;
+  --color-yuksek:     #e8762c;
+  --color-yuksek-bg:  #fff3e0;
+  --color-kritik:     #d83a2c;
+  --color-kritik-bg:  #ffe8e0;
+  --radius-md:        8px;
+  --radius-lg:        12px;
+}
+
+[data-tema="canli"] {
+  /* Monzo'dan esinlenilmiş — canlı, beyaz + mercan vurgu */
+  --color-paper:      #ffffff;
+  --color-paper-2:    #f2f8f3;
+  --color-paper-3:    #e8eeed;
+  --color-ink:        #091723;
+  --color-ink-2:      #2f3a3e;
+  --color-ink-3:      #75817e;
+  --color-rule:       #d0d4d3;
+  --color-accent:     #ff4f40;
+  --color-accent-2:   #ffe8e5;
+  --color-focus:      #0066cc;
+  /* Durum renkleri — beyaz arka plana karşı yeterli kontrast, ayırt edilebilir */
+  --color-guvenli:    #00a86b;
+  --color-guvenli-bg: #e8f7f1;
+  --color-az:         #ff8c00;
+  --color-az-bg:      #fff3e0;
+  --color-yuksek:     #ff5722;
+  --color-yuksek-bg:  #ffe0d0;
+  --color-kritik:     #d32f2f;
+  --color-kritik-bg:  #ffebee;
+  --radius-md:        128px;
+  --radius-lg:        32px;
+}
+
 * { box-sizing: border-box; }
 
 html, body {
@@ -116,15 +167,16 @@ html, body {
 h1, h2, h3, h4 {
   font-family: var(--font-display);
   font-style: normal;
-  font-weight: 400;
+  font-weight: 700;
   line-height: 1.08;
   letter-spacing: -0.015em;
   overflow-wrap: anywhere;
+  hyphens: auto;
   min-width: 0;
   margin: 0;
 }
 
-p { margin: 0; max-width: 62ch; }
+p { margin: 0; max-width: 62ch; overflow-wrap: anywhere; hyphens: auto; }
 
 a { color: var(--color-accent); text-underline-offset: 3px; }
 
@@ -149,6 +201,9 @@ a { color: var(--color-accent); text-underline-offset: 3px; }
   background: color-mix(in oklch, var(--color-paper) 92%, transparent);
   backdrop-filter: blur(10px);
   border-bottom: var(--rule-hair) solid var(--color-rule);
+}
+h1, h2, h3, h4, .asama, .alan {
+  scroll-margin-top: 6rem;
 }
 .masthead .ic {
   display: flex; align-items: center; justify-content: space-between;
@@ -213,6 +268,7 @@ a { color: var(--color-accent); text-underline-offset: 3px; }
 /* ---------------------------------------------------- aşama (workflow) */
 .asama { padding-block: var(--space-3xl); }
 .asama + .asama { border-top: var(--rule-thick) solid var(--color-ink); }
+/* R7: Başlık hiyerarşisi — bölüm numarası → başlık → giriş metni */
 .asama-no {
   font-family: var(--font-mono);
   font-size: var(--text-sm);
@@ -221,8 +277,17 @@ a { color: var(--color-accent); text-underline-offset: 3px; }
   display: block;
   margin-bottom: var(--space-sm);
 }
-.asama h2 { font-size: clamp(2rem, 5vw, var(--text-3xl)); max-width: 20ch; }
-.asama .giris { margin-top: var(--space-md); font-size: var(--text-lg); color: var(--color-ink-2); }
+.asama h2 {
+  font-size: clamp(2.25rem, 6vw, var(--text-3xl));
+  max-width: 20ch;
+  margin-bottom: var(--space-lg);
+}
+.asama .giris {
+  margin-bottom: var(--space-lg);
+  font-size: var(--text-lg);
+  color: var(--color-ink-2);
+  max-width: 62ch;
+}
 
 /* ------------------------------------------------------ 2 kutu seçimi */
 .kutular {
@@ -264,39 +329,71 @@ a { color: var(--color-accent); text-underline-offset: 3px; }
 }
 
 /* ---------------------------------------------------------------- form */
+/* R12: Başlık hiyerarşisi — soru belirgin, büyük */
 .alan { margin-top: var(--space-xl); }
 .alan > legend, .alan > .etiket {
-  font-size: var(--text-lg);
-  font-weight: 600;
+  font-size: var(--text-xl);
+  font-weight: 700;
   display: block;
-  margin-bottom: var(--space-xs);
+  margin-bottom: var(--space-md);
   padding: 0;
+  color: var(--color-ink);
 }
 .alan .yardim {
-  font-size: var(--text-sm); color: var(--color-ink-3);
+  font-size: var(--text-base); color: var(--color-ink-2);
   margin-bottom: var(--space-md); max-width: 54ch;
 }
 fieldset { border: 0; padding: 0; margin: 0; }
 
-.secenekler { display: grid; gap: var(--space-xs); }
-.secenek {
-  display: flex; align-items: center; gap: var(--space-md);
-  min-height: var(--tap);
-  padding: var(--space-sm) var(--space-md);
-  background: var(--color-paper-2);
-  border: var(--rule-hair) solid var(--color-rule);
-  border-radius: var(--radius-md);
-  cursor: pointer;
+/* R3: Seçenek kartları — büyük, dokunması kolay */
+.secenekler {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-md);
 }
-.secenek:hover, .secenek.is-hover { background: var(--color-paper-3); }
-.secenek input { width: 26px; height: 26px; accent-color: var(--color-accent); flex: 0 0 auto; margin: 0; }
+/* R3: Yan yana ızgara — kısa şıklar */
+.secenekler[data-kisa="1"] {
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--space-md);
+}
+.secenek {
+  display: flex; align-items: flex-start; gap: var(--space-lg);
+  min-height: 120px; padding: var(--space-lg);
+  background: var(--color-paper-2);
+  border: 2px solid var(--color-rule);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all var(--dur-base) var(--ease-out);
+}
+.secenek:hover, .secenek.is-hover {
+  background: var(--color-paper-3);
+  border-color: var(--color-ink-2);
+  transform: translateY(-2px);
+}
+.secenek input {
+  width: 24px; height: 24px;
+  accent-color: var(--color-accent);
+  flex: 0 0 auto; margin-top: 2px;
+}
+.secenek[aria-checked="true"],
 .secenek:has(input:checked) {
   background: var(--color-accent-2);
   border-color: var(--color-accent);
-  box-shadow: inset 0 0 0 1px var(--color-accent);
+  border-width: 2px;
 }
-.secenek .metin { display: flex; flex-direction: column; }
-.secenek .metin small { color: var(--color-ink-3); font-size: var(--text-sm); }
+.secenek .metin {
+  display: flex; flex-direction: column;
+  gap: var(--space-sm);
+}
+.secenek .metin strong {
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--color-ink);
+}
+.secenek .metin small {
+  color: var(--color-ink-3);
+  font-size: var(--text-sm);
+}
 
 input[type="text"], input[type="number"], select {
   width: 100%; min-height: var(--tap);
@@ -337,12 +434,16 @@ input:disabled, select:disabled { opacity: 0.5; cursor: not-allowed; }
   color: var(--color-paper); background: var(--color-ink);
   border: 2px solid var(--color-ink); border-radius: var(--radius-md);
   cursor: pointer; text-decoration: none;
-  transition: background var(--dur-fast) var(--ease-out),
-              transform var(--dur-fast) var(--ease-out);
+  transition: all var(--dur-fast) var(--ease-out);
 }
 .dugme:hover, .dugme.is-hover { background: var(--color-accent); border-color: var(--color-accent); }
 .dugme:active, .dugme.is-active { transform: translateY(1px); }
-.dugme[disabled] { opacity: 0.45; cursor: not-allowed; }
+/* R12: Disabled — renkten daha fazla */
+.dugme:disabled, .dugme[aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
 .dugme.ikincil {
   color: var(--color-ink); background: transparent;
   border-color: var(--color-ink);
@@ -350,11 +451,14 @@ input:disabled, select:disabled { opacity: 0.5; cursor: not-allowed; }
 .dugme.ikincil:hover, .dugme.ikincil.is-hover { background: var(--color-paper-3); }
 .dugme[data-durum="yukleniyor"] { pointer-events: none; opacity: 0.7; }
 
+/* Üst bar düğmeleri — tema, sıfırla — tek satır, sarmıyor */
 .dugme-baslik {
   background: transparent; border: none; cursor: pointer;
   font-size: var(--text-sm); color: var(--color-ink-2);
   min-height: var(--tap); padding: 0 var(--space-sm);
   text-decoration: underline; text-underline-offset: 3px;
+  white-space: nowrap;
+  transition: color var(--dur-fast) var(--ease-out);
 }
 .dugme-baslik:hover { color: var(--color-ink); }
 
@@ -449,6 +553,125 @@ input:disabled, select:disabled { opacity: 0.5; cursor: not-allowed; }
   color: currentColor;
 }
 .sonuc-bas .ozet { margin-top: var(--space-sm); color: var(--color-ink); font-size: var(--text-lg); }
+
+/* ============================================================= V3: BİLGİ TASARIMI */
+/* Göz-üstü etiket — başlık öncesi, küçük, seyrek harfler, turuncu, uppercase */
+.goz-ustu {
+  display: block;
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--color-accent);
+  margin-bottom: var(--space-sm);
+}
+
+/* Başlık altı turuncu çizgi (~60px) */
+.baslik-cizgi {
+  width: 60px;
+  height: 4px;
+  background: var(--color-accent);
+  margin-top: var(--space-sm);
+  margin-bottom: var(--space-md);
+  border-radius: 2px;
+}
+
+/* Alt başlık — vurgulu renkle, tek cümle */
+.alt-baslik {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--color-focus);
+  margin-bottom: var(--space-lg);
+  max-width: 62ch;
+}
+
+/* Numaralı daire rozet — 1, 2, 3, … turuncu arka plan */
+.rozet-no {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  color: white;
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* Pill etiket — kart altında, kısa nitelikler */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-md);
+  background: var(--color-paper-3);
+  border: 1px solid var(--color-rule);
+  border-radius: 20px;
+  font-size: var(--text-sm);
+  color: var(--color-ink);
+  white-space: nowrap;
+}
+
+/* Pilller sırası — kart altında, sarı halinde */
+.pill-sira {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  margin-top: var(--space-md);
+}
+
+/* Koyu lacivert panel — en kritik mesaj için */
+.panel-koyu {
+  padding: var(--space-xl);
+  background: #0e1e37;
+  color: white;
+  border-radius: var(--radius-lg);
+  margin-top: var(--space-2xl);
+}
+.panel-koyu h3,
+.panel-koyu h4 {
+  color: white;
+}
+.panel-koyu .baslik-cizgi {
+  background: var(--color-accent);
+}
+.panel-koyu .goz-ustu {
+  color: var(--color-accent);
+}
+
+/* Sol kenarlıklı alıntı/uyarı kutusu — feragat ve uyarılar */
+.alinti-kutu {
+  padding: var(--space-lg);
+  padding-left: var(--space-xl);
+  background: #e8eff8;
+  border-left: 4px solid var(--color-accent);
+  border-radius: var(--radius-md);
+  margin-top: var(--space-2xl);
+}
+.alinti-kutu p {
+  font-size: var(--text-base);
+  color: var(--color-ink);
+  font-style: italic;
+  line-height: 1.6;
+}
+
+/* değerlendirme seçenek kartları (yapısal sonuç ekranı) */
+.secenek-kartlar {
+  display: grid; gap: var(--space-lg);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  margin-top: var(--space-lg);
+}
+.secenek-kart {
+  padding: var(--space-lg);
+  background: var(--color-paper-2);
+  border-radius: var(--radius-md);
+  border-left: var(--rule-thick) solid var(--color-rule);
+}
 
 /* görev kartları (kontrol listesi) */
 .gorev-kart {
@@ -558,6 +781,35 @@ dialog.diyalog::backdrop { background: rgba(0,0,0,0.3); }
   .adim { animation: none; }
 }
 
+/* ================================================================ PRINT */
+@media print {
+  * { background: none !important; }
+  .masthead, .dugme-sira, #hero, .ayak .baglar,
+  #tema-degistir, #sifirla, #rapor-yazdir-yapisal, #rapor-yazdir-ev,
+  .hero, .asama:not(.rapor), .bilgi-notu {
+    display: none !important;
+  }
+  .rapor:not([hidden]) {
+    display: block !important;
+    page-break-before: avoid;
+    page-break-inside: avoid;
+  }
+  body, html { background: white; color: black; }
+  a { color: #0066cc; text-decoration: underline; }
+  h1, h2, h3, h4 { color: black; page-break-after: avoid; }
+  p, li { color: black; orphans: 3; widows: 3; }
+  .rapor h1 { font-size: 28px; margin-bottom: 1rem; }
+  .rapor h2 { font-size: 22px; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+}
+
+/* ================================================================ RESPONSIVE */
+@media (min-width: 48rem) {
+  /* R9: Tablet ve üstü */
+  .secenekler[data-kisa="1"] {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+}
+
 @media (max-width: 40rem) {
   :root { --space-3xl: 3rem; --space-4xl: 4rem; }
   /* nav dar ekranda alt satıra iner ve tam genişliği paylaşır —
@@ -575,6 +827,10 @@ dialog.diyalog::backdrop { background: rgba(0,0,0,0.3); }
   }
   .marka { min-height: 2.75rem; }
   .kutu { padding: var(--space-lg); min-height: auto; }
+  .secenek { min-height: auto; padding: var(--space-md); }
+  .secenekler[data-kisa="1"] {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  }
 }
 
 /* Konumdan ilçe bulma bloğu (adres adımı). */
@@ -587,16 +843,33 @@ dialog.diyalog::backdrop { background: rgba(0,0,0,0.3); }
 /* Durum satırı yalnızca içerik varken görünsün. */
 .konum-durum:empty { display: none; }
 
+/* Üst bar göstergeleri — boşken yer kaplamıyor */
+#ust-adim:empty, #ust-raporlar:empty { display: none; }
+
+
+/* Üst bar her kırılma noktasında aynı davransın; mobilde static kalınca
+ * hero'nun üstüne biniyordu. */
+.masthead {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+}
+/* tabindex="-1" ile programatik odaklanan başlıklarda halka çizilmesin;
+ * klavye kullanıcısının :focus-visible halkası korunur. */
+h1[tabindex="-1"]:focus:not(:focus-visible),
+h2[tabindex="-1"]:focus:not(:focus-visible),
+h3[tabindex="-1"]:focus:not(:focus-visible) { outline: none; }
+
 </style>
 </head>
 <body>
 <header class="masthead">
   <div class="kapsa ic">
-    <a class="marka" href="#ust">deprem<b>lab</b></a>
+    <a class="marka" href="#ust">Deprem Rehberim</a>
     <nav aria-label="Ana menü">
-      <a href="#bolum-giris">Başla</a>
-      <a href="harita.html">Harita<br><small>Genel bilgi amaçlıdır</small></a>
-      <a href="#veri">Veri</a>
+      <div id="ust-adim"></div>
+      <div id="ust-raporlar"></div>
+      <button type="button" id="tema-degistir" class="dugme-baslik" title="Temayı değiştir" aria-pressed="false">Tema</button>
       <button type="button" id="sifirla" class="dugme-baslik" title="Değerlendirmeyi sıfırla">Sıfırla</button>
     </nav>
   </div>
@@ -605,7 +878,7 @@ dialog.diyalog::backdrop { background: rgba(0,0,0,0.3); }
 <main id="ust">
 
   <!-- ============================================ parallax hero -->
-  <section class="hero" aria-labelledby="hero-baslik">
+  <section class="hero" id="hero" aria-labelledby="hero-baslik">
     <div class="hero-kat kat-arka" data-hiz="0.10" aria-hidden="true">
       <svg viewBox="0 0 1200 420" preserveAspectRatio="xMidYMid slice"><g id="fay-arka"></g></svg>
     </div>
@@ -626,13 +899,13 @@ dialog.diyalog::backdrop { background: rgba(0,0,0,0.3); }
 
   <!-- ============================================ bölüm 1: giriş (landing) -->
   <section class="asama kapsa" id="bolum-giris" aria-labelledby="a1">
-    <h2 id="a1">Depreme ne kadar hazırsın?</h2>
-    <p class="giris">
-      Binan hakkında bildiklerini anlamlandır, evindeki riskleri azalt ve bugün atabileceğin ilk adımları gör.
-    </p>
+    <div class="goz-ustu">Hazırlık rehberi</div>
+    <h2 id="a1">Nereden başlamak istersin?</h2>
+    <div class="baslik-cizgi"></div>
+    <p class="giris">İki modül var, ikisi de bağımsız. İstediğinden başlayabilirsin.</p>
 
     <!-- üç fayda maddesi -->
-    <div class="fayda-sira">
+    <div class="fayda-sira" data-kartlar="1">
       <div class="fayda">
         <h3>Binanı anla</h3>
         <p>Elindeki bina bilgilerini daha anlamlı hale getir.</p>
@@ -648,15 +921,17 @@ dialog.diyalog::backdrop { background: rgba(0,0,0,0.3); }
     </div>
 
     <!-- iki modül kartı -->
-    <div class="modul-kartlar">
+    <div class="modul-kartlar" data-kartlar="1">
       <div class="modul-kart">
-        <h3>Yapısal Ön Değerlendirme</h3>
+        <h3>Binanı Anla</h3>
+        <p class="teknik-ad">Yapısal Ön Değerlendirme</p>
         <p>Binanız hakkında bildiklerinizi gözden geçirin ve profesyonel değerlendirmeye ne kadar öncelik vermeniz gerektiğini anlayın.</p>
         <p class="sure">Yaklaşık 5 dakika</p>
         <button type="button" id="git-gizlilik-yapisal" class="dugme">Binamı değerlendirmeye başla</button>
       </div>
       <div class="modul-kart">
-        <h3>Yapısal Olmayan Risk Kontrolü</h3>
+        <h3>Evini Hazırla</h3>
+        <p class="teknik-ad">Yapısal Olmayan Risk Kontrolü</p>
         <p>Evinizde devrilebilecek, düşebilecek veya çıkış yolunu engelleyebilecek riskleri kontrol edin.</p>
         <p class="sure">Yaklaşık 3 dakika</p>
         <button type="button" id="git-gizlilik-evici" class="dugme">Evimi kontrol etmeye başla</button>
@@ -664,14 +939,16 @@ dialog.diyalog::backdrop { background: rgba(0,0,0,0.3); }
     </div>
 
     <!-- feragat -->
-    <div class="bilgi-notu">
+    <div class="alinti-kutu">
       <p>Bu araç resmî bina risk tespiti veya deprem performans analizi yerine geçmez.</p>
     </div>
   </section>
 
   <!-- ============================================ bölüm 2: gizlilik -->
   <section class="asama kapsa" id="bolum-gizlilik" hidden aria-labelledby="a2">
+    <div class="goz-ustu">Bilgilendirme</div>
     <h2 id="a2">Başlamadan önce</h2>
+    <div class="baslik-cizgi"></div>
     <div class="bilgi-govdesi">
       <p>
         Bu prototip kayıt gerektirmez. Girdiğiniz adres ve yanıtlar yalnızca bu sayfa açıkken size örnek bir değerlendirme sunmak için kullanılır. Bilgileriniz bir sunucuya gönderilmez ve kalıcı olarak saklanmaz.
@@ -685,7 +962,9 @@ dialog.diyalog::backdrop { background: rgba(0,0,0,0.3); }
 
   <!-- ============================================ bölüm 3: adres -->
   <section class="asama kapsa" id="bolum-adres" hidden aria-labelledby="a3">
+    <div class="goz-ustu">Adım 1 · Konum</div>
     <h2 id="a3">Önce yaşadığın yeri bulalım.</h2>
+    <div class="baslik-cizgi"></div>
     <p class="giris">
       Adresiniz yalnızca bu sayfa açıkken demo bölgesel bilgileri göstermek için kullanılır. Bir sunucuya gönderilmez veya saklanmaz.
     </p>
@@ -737,7 +1016,9 @@ dialog.diyalog::backdrop { background: rgba(0,0,0,0.3); }
 
   <!-- ============================================ bölüm 4: bölgesel -->
   <section class="asama kapsa" id="bolum-bolgesel" hidden aria-labelledby="a4">
-    <h2 id="a4">Bölgesel bilgiler</h2>
+    <div class="goz-ustu">Adım 2 · Bölgesel bilgiler</div>
+    <h2 id="a4">Bölgesel bağlam</h2>
+    <div class="baslik-cizgi"></div>
     <div id="bolgesel-govde"></div>
     <div class="dugme-sira">
       <button type="button" id="bolgesel-devam" class="dugme">Bina sorularına devam et</button>
@@ -747,7 +1028,9 @@ dialog.diyalog::backdrop { background: rgba(0,0,0,0.3); }
 
   <!-- ============================================ bölüm 5: sorular -->
   <section class="asama kapsa" id="bolum-sorular" hidden aria-labelledby="a5">
+    <div class="goz-ustu">Adım 3 · Sorular</div>
     <h2 id="a5">Bina hakkında sorularımız var</h2>
+    <div class="baslik-cizgi"></div>
     <div id="adim-gostergesi"></div>
     <div id="soru-govde"></div>
     <p id="soru-ilerleme" class="ilerleme-metni"></p>
@@ -759,7 +1042,9 @@ dialog.diyalog::backdrop { background: rgba(0,0,0,0.3); }
 
   <!-- ============================================ bölüm 6: gözden geçir -->
   <section class="asama kapsa" id="bolum-gozden-gecir" hidden aria-labelledby="a6">
+    <div class="goz-ustu">Adım 4 · Gözden geçirme</div>
     <h2 id="a6">Yanıtlarınızı gözden geçirin</h2>
+    <div class="baslik-cizgi"></div>
     <div id="gozden-gecir-govde"></div>
     <div class="dugme-sira">
       <button type="button" id="gozden-gecir-onayla" class="dugme">Onayla ve sonucu gör</button>
@@ -768,10 +1053,14 @@ dialog.diyalog::backdrop { background: rgba(0,0,0,0.3); }
   </section>
 
   <!-- ============================================ bölüm 7: yapısal sonuç -->
-  <section class="asama kapsa" id="bolum-yapisal-sonuc" hidden aria-labelledby="a7">
-    <h2 id="a7">Yapısal Değerlendirme Sonucu</h2>
+  <section class="asama kapsa rapor" id="bolum-yapisal-sonuc" hidden aria-labelledby="a7">
+    <div class="goz-ustu">Rapor</div>
+    <h2 id="a7">Bina Raporu</h2>
+    <div class="baslik-cizgi"></div>
     <div id="yapisal-sonuc-govde"></div>
+    <div id="rapor-neye-dayaniyorsa-yapisal"></div>
     <div class="dugme-sira">
+      <button type="button" id="rapor-yazdir-yapisal" class="dugme ikincil" title="Raporu PDF olarak indir">PDF olarak indir</button>
       <button type="button" id="yapisal-sonuc-devam" class="dugme">Kontrol listesine devam et</button>
       <button type="button" class="dugme ikincil" data-git="bolum-giris">Başa dön</button>
     </div>
@@ -779,7 +1068,9 @@ dialog.diyalog::backdrop { background: rgba(0,0,0,0.3); }
 
   <!-- ============================================ bölüm 8: kontrol listesi -->
   <section class="asama kapsa" id="bolum-kontrol" hidden aria-labelledby="a8">
-    <h2 id="a8">Şimdi evin içini kontrol edelim.</h2>
+    <div class="goz-ustu">Modül 2</div>
+    <h2 id="a8">Evini hazırla</h2>
+    <div class="baslik-cizgi"></div>
     <p class="giris">Bu kısa kontrol listesi, evinizde azaltabileceğiniz yapısal olmayan riskleri fark etmenize yardımcı olur.</p>
     <div id="adim-gostergesi-2"></div>
     <div id="kontrol-govde"></div>
@@ -792,10 +1083,14 @@ dialog.diyalog::backdrop { background: rgba(0,0,0,0.3); }
   </section>
 
   <!-- ============================================ bölüm 9: ev sonucu -->
-  <section class="asama kapsa" id="bolum-ev-sonuc" hidden aria-labelledby="a9">
-    <h2 id="a9">Ev hazırlık planın</h2>
+  <section class="asama kapsa rapor" id="bolum-ev-sonuc" hidden aria-labelledby="a9">
+    <div class="goz-ustu">Rapor</div>
+    <h2 id="a9">Ev Raporu</h2>
+    <div class="baslik-cizgi"></div>
     <div id="ev-sonuc-govde"></div>
+    <div id="rapor-neye-dayaniyorsa-ev"></div>
     <div class="dugme-sira">
+      <button type="button" id="rapor-yazdir-ev" class="dugme ikincil" title="Raporu PDF olarak indir">PDF olarak indir</button>
       <button type="button" id="ev-sonuc-ozet" class="dugme">Hazırlık planını gör</button>
       <button type="button" class="dugme ikincil" data-git="bolum-giris">Başa dön</button>
     </div>
@@ -803,9 +1098,13 @@ dialog.diyalog::backdrop { background: rgba(0,0,0,0.3); }
 
   <!-- ============================================ bölüm 10: özet -->
   <section class="asama kapsa" id="bolum-ozet" hidden aria-labelledby="a10">
+    <div class="goz-ustu">Sonraki Adımını Belirle</div>
     <h2 id="a10">Hazırlık planın</h2>
+    <div class="baslik-cizgi"></div>
     <div id="ozet-govde"></div>
     <div class="dugme-sira">
+      <button type="button" id="ozet-yapisal-rapor" class="dugme ikincil" hidden>Bina raporunu aç</button>
+      <button type="button" id="ozet-ev-rapor" class="dugme ikincil" hidden>Ev raporunu aç</button>
       <button type="button" id="ozet-yapisala-don" class="dugme ikincil" hidden>Bina değerlendirmesine dön</button>
       <button type="button" id="ozet-evicine-don" class="dugme ikincil" hidden>Yapılacaklar listeme dön</button>
       <button type="button" class="dugme ikincil" data-git="bolum-giris">Başa dön</button>
@@ -814,7 +1113,9 @@ dialog.diyalog::backdrop { background: rgba(0,0,0,0.3); }
 
   <!-- ============================================ bölüm 11: bulunamadı -->
   <section class="asama kapsa" id="bolum-bulunamadi" hidden aria-labelledby="a11">
+    <div class="goz-ustu">Hata</div>
     <h2 id="a11">Sayfa bulunamadı</h2>
+    <div class="baslik-cizgi"></div>
     <p>Girdiğiniz bölüm mevcut değil.</p>
     <button type="button" class="dugme" data-git="bolum-giris">Başa dön</button>
   </section>
@@ -862,7 +1163,7 @@ dialog.diyalog::backdrop { background: rgba(0,0,0,0.3); }
 <!-- ============================================ durum duyuruları (aria-live) -->
 <div id="duyuru" role="status" aria-live="polite" aria-atomic="true" class="gizli-metin"></div>
 
-<footer class="ayak">
+<footer class="ayak" id="ayak">
   <div class="kapsa">
     <p class="beyan">
       Bu bir tahmindir, rapor değildir. Binanızın gerçek durumunu yalnızca yerinde inceleme söyleyebilir.
@@ -870,8 +1171,11 @@ dialog.diyalog::backdrop { background: rgba(0,0,0,0.3); }
     <p class="kucuk">
       Hesap; zemin sertliği, faya uzaklık, yapım dönemi ve kat sayısı üzerinden kaba bir gösterge üretir. Binanın taşıyıcı sistemi, malzeme kalitesi, zemin etüdü ve yapılan tadilatlar bu hesapta yoktur — ve bunlar çoğu zaman belirleyici olandır.
     </p>
+    <div class="alinti-kutu">
+      <p><small>Genel bilgi amaçlıdır.</small></p>
+    </div>
     <div class="baglar">
-      <a href="harita.html">Harita</a>
+      <a href="harita.html" title="Bölgesel bilgiler haritası — eğitim amaçlı">Harita</a>
       <a href="KAYNAKLAR.md">Veri kaynakları</a>
       <a href="ÖZET.md">Bulgu özeti</a>
     </div>
@@ -1214,24 +1518,51 @@ function bolgeselBaglam(D, ilceAdi) {
   const zeminNit = zeminNiteligi(ilce.vs30);
   const fayNit = fayNiteligi(ilce.fay_km);
 
+  /* Açık alan: ilçedeki açık/yeşil alan ÷ senaryo geçici barınma ihtiyacı.
+   * Çıplak sayı kullanıcıya bir şey anlatmıyor; yorumunu da veriyoruz.
+   * Rakam alt sınırdır — okul bahçesi, ilçe parkları, kampüsler envanterde yok. */
+  let acikAlan;
+  if (ilce.m2kisi == null) {
+    acikAlan = { deger: 'veri yok', metin: 'Bu ilçe için açık alan hesabı yapılamadı.' };
+  } else {
+    const dar = ilce.m2kisi < 15;
+    acikAlan = {
+      deger: `kişi başına ${ilce.m2kisi} m²`,
+      metin: (dar
+        ? 'Senaryo sonrası barınma ihtiyacına göre açık alan dar görünüyor. '
+        : 'Senaryo sonrası barınma ihtiyacına göre açık alan görece geniş görünüyor. ')
+        + 'Bu rakam alt sınırdır: okul bahçeleri, ilçe parkları ve kampüsler '
+        + 'envantere dahil değildir.',
+    };
+  }
+
   return {
     konumEtiketi: ilceAdi,
     veriDurumu: 'mevcut',
     nitelikselBaglam: [
-      { baslik: 'Zemin niteliği', metin: zeminNit.metin },
-      { baslik: 'Fay yakınlığı', metin: fayNit.metin },
       {
-        baslik: 'Açık alan',
-        metin: ilce.yesil_ha && ilce.m2kisi
-          ? `Bu ilçede senaryo barınma ihtiyacına göre ${ilce.m2kisi} m² açık alan düşüyor.`
-          : 'Açık alan bilgisi yok.',
+        baslik: 'Zemin niteliği',
+        deger: ilce.vs30 == null ? 'veri yok' : `Vs30 ≈ ${Math.round(ilce.vs30)} m/s`,
+        metin: zeminNit.metin,
       },
+      {
+        baslik: 'Fay yakınlığı',
+        deger: `${ilce.fay_km.toFixed(1)} km — ${ilce.fay_ad || 'en yakın bilinen fay'}`,
+        metin: fayNit.metin,
+      },
+      { baslik: 'Açık alan', deger: acikAlan.deger, metin: acikAlan.metin },
     ],
-    veriTarihi: '2024–2026',
-    kaynak: 'Demo veri (İBB deprem senaryosu, USGS Vs30, Kandilli Fay Veritabanı)',
+    /* Kaynaklar gerçektir; "demo" diye etiketlemek yanlış beyan olurdu.
+     * Prototip olan, bu veriden değil anketten türetilen yapısal sonuçtur. */
+    veriTarihi: 'Vs30 ve fay verisi: güncel yayın · Deprem kaydı: 1905–2025 · '
+              + 'İBB senaryo sonuçları: 2019 Mw 7.5 Marmara senaryosu',
+    kaynak: 'USGS Global Vs30 Mosaic · Türkiye diri fay verisi · USGS FDSN deprem '
+          + 'kataloğu · İBB açık veri (deprem senaryosu, yeşil alan envanteri) · '
+          + 'OpenStreetMap',
     sinirlar: [
-      'Bu bilgiler ilçe ölçeğindedir.',
-      'Binanızın zeminini veya deprem performansını göstermez.',
+      'Bu bilgiler ilçe ölçeğindedir; sokağınızı veya binanızı temsil etmez.',
+      'Zemin verisi yaklaşık 926 metrelik hücrelerden okunur, saha etüdü değildir.',
+      'Senaryo sonuçları olasılıklıdır; tek bir bina için tahmin üretmez.',
       'Bölgesel tehlike ile binanın yapısal performansı aynı şey değildir.',
     ],
   };
@@ -1297,6 +1628,82 @@ function birlesikOzet(yapisalSonuc, evDurumu) {
 }
 
 const OZET_DESTEK = 'Sonraki adımları küçük küçük tamamlamak, hiçbir şey yapmamaktan daha değerlidir.';
+
+/* --------------------------------------------- kentsel dönüşüm yolu */
+
+/* Kullanıcı, binası hakkında bir şey öğrendikten sonra "peki şimdi ne
+ * yapacağım" diye kalıyor. Bu blok resmî süreci tarif eder.
+ *
+ * Bilinçli olarak YÖNLENDİRME değil BİLGİLENDİRME: bu uygulamanın anketi
+ * bir binanın riskli olup olmadığını belirleyemez, dolayısıyla kimseye
+ * "dönüşüme girin" denmez. Söylenen şey, sürecin nasıl işlediği ve ilk
+ * adımın nerede atıldığı.
+ *
+ * Yasal ayrıntı vermekten kaçınılır: 6306 uygulama yönetmeliği en son
+ * 4 Şubat 2026'da değişti. Oran, süre ve hak iddiaları burada yazılmaz;
+ * kullanıcı resmî kaynağa gönderilir.
+ */
+const KENTSEL_DONUSUM = {
+  baslik: 'Kentsel dönüşüm süreci nasıl işliyor?',
+  giris: 'Binanızın durumunu resmî olarak öğrenmek ve dönüşüm sürecine '
+       + 'başlamak 6306 sayılı Kanun kapsamında yürür. Aşağıdakiler sürecin '
+       + 'genel işleyişidir.',
+  adimlar: [
+    {
+      no: 1,
+      baslik: 'Riskli yapı tespiti başvurusu',
+      metin: 'Başvuru, Çevre, Şehircilik ve İklim Değişikliği Bakanlığı '
+           + 'tarafından lisanslandırılmış kurum ve kuruluşlara yapılır. '
+           + 'Binanızın bulunduğu ildeki lisanslı kuruluşların güncel '
+           + 'listesini Bakanlıktan öğrenebilirsiniz.',
+    },
+    {
+      no: 2,
+      baslik: 'Tek malik de başlatabilir',
+      metin: 'Tespit başvurusu için kat maliklerinin çoğunluğunun onayı '
+           + 'aranmaz; maliklerden birinin veya kanuni temsilcisinin '
+           + 'başvurusu yeterlidir. Komşularınızı ikna etmeyi beklemeden '
+           + 'süreci başlatabilirsiniz.',
+    },
+    {
+      no: 3,
+      baslik: 'Masraf ve inceleme',
+      metin: 'Tespit masrafı başvuranca karşılanır. Lisanslı kuruluş binada '
+           + 'yerinde inceleme yapar; beton ve donatı üzerinden ölçüm alınır. '
+           + 'Bu, bir anketin veremeyeceği tek gerçek sonuçtur.',
+    },
+    {
+      no: 4,
+      baslik: 'Sonuç, bildirim ve itiraz',
+      metin: 'Tespit sonucu ilgili müdürlüğe bildirilir ve binanın tapu '
+           + 'kaydına işlenir. Sonuca itiraz yolu açıktır. İtiraz süreleri ve '
+           + 'usulü mevzuatta belirlidir; güncel hâlini resmî kaynaktan '
+           + 'doğrulayın.',
+    },
+    {
+      no: 5,
+      baslik: 'Riskli çıkarsa',
+      metin: 'Yıkım, güçlendirme ve yeniden yapım seçenekleri ile kira '
+           + 'yardımı gibi destekler bu aşamada gündeme gelir. Hangi '
+           + 'seçeneğin uygun olduğu ve malikler arasındaki karar usulü '
+           + 'mevzuata tabidir; bir hukukçuya danışmanız yerinde olur.',
+    },
+  ],
+  nereden: [
+    { ad: 'Çevre, Şehircilik ve İklim Değişikliği Bakanlığı',
+      not: 'Lisanslı kuruluş listesi ve güncel mevzuat metni.' },
+    { ad: 'e-Devlet',
+      not: 'Binanıza ait mevcut riskli yapı kaydını sorgulayabilirsiniz.' },
+    { ad: 'Belediyenizin imar müdürlüğü',
+      not: 'Yapı ruhsatı tarihi ve bina dosyası için.' },
+  ],
+  uyari: 'Bu bölüm genel bilgilendirmedir, hukuki danışmanlık değildir. '
+       + '6306 sayılı Kanun\'un uygulama yönetmeliği en son 4 Şubat 2026\'da '
+       + 'değişmiştir; başvuru öncesi güncel metni resmî kaynaktan doğrulayın.',
+  sinir: 'Bu uygulamadaki değerlendirme binanızın riskli yapı olup olmadığını '
+       + 'belirleyemez. Bunu yalnızca lisanslı bir kuruluşun yerinde yapacağı '
+       + 'inceleme belirler.',
+};
 
 
 </script>
@@ -1514,7 +1921,7 @@ const YUZDE_ACIKLAMASI = 'Bu oran yalnızca kontrol listesindeki önlemlerin ka�
 
 </script>
 <script>
-/* depremlab — yeni akış kontrolü.
+/* Bina Güvenliği — akış kontrolü
  * risk_engine.js, nonstructural.js fonksiyonlarını kullanır; D global veri paketidir.
  * State: bellekte, persistence yok. PrivacyNoticeSeen ilk kez gösterilir.
  */
@@ -1574,6 +1981,82 @@ function resetSession() {
   };
 }
 
+/* ======================================================== R3: Seçenek göstergeleri */
+/* Seçim göstergesi: nötr, anlam taşımayan visual marker (aria-checked ile belirtilir) */
+function secenekGostergesi() {
+  return '○'; // Nötr seçim göstergesi, aria-hidden="true"
+}
+
+/* ======================================================== R5: Rapor kaynakları */
+/* Sabit kaynak tablosu — kontrat §R5 birebir */
+const RAPOR_KAYNAKLAR = {
+  yapisal: {
+    'usgs_vs30': { ad: 'USGS Vs30', deger: '27.600' },
+    'turkiye_fay': { ad: 'Türkiye diri fay', deger: '926' },
+    'usgs_fdsn': { ad: 'USGS FDSN deprem kaydı', deger: '2.015' },
+    'obb_osm': { ad: 'İBB açık veri + OpenStreetMap', deger: '1.788' },
+  }
+};
+
+function raporProvenance(tip, cevaplar, adres, bolgeselBilgi) {
+  let html = '<section class="rapor-provenance">';
+  html += '<div class="goz-ustu">Veri Kaynakları</div>';
+  html += '<h3 style="margin-top: 0;">Bu rapor neye dayanıyor</h3>';
+  html += '<div class="baslik-cizgi"></div>';
+
+  // Kullanıcının yanıtları
+  if (tip === 'yapisal') {
+    html += '<h4 style="margin-top: var(--space-lg);">Sizin verdiğiniz bilgiler</h4>';
+    html += '<div class="secenek-kartlar" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-md);">';
+    YAPISAL_SORULAR.forEach(s => {
+      const c = cevaplar[s.id];
+      if (c) {
+        const sec = s.secenekler.find(x => x.deger === c);
+        html += `<div class="secenek-kart" style="padding: var(--space-md); border: 1px solid var(--color-border); border-radius: 8px;">
+          <b>${kacir(s.soru)}</b><br><span style="font-size: var(--text-sm); color: var(--color-ink-2);">${sec ? kacir(sec.etiket) : c}</span>
+        </div>`;
+      }
+    });
+    html += '</div>';
+
+    // Bölgesel kaynaklar (sadece yapısal)
+    html += '<h4 style="margin-top: var(--space-lg);">Bölgesel veri kaynakları</h4>';
+    html += '<div class="secenek-kartlar" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-md);">';
+    for (const [k, v] of Object.entries(RAPOR_KAYNAKLAR.yapisal)) {
+      html += `<div class="secenek-kart" style="padding: var(--space-md); border: 1px solid var(--color-border); border-radius: 8px;">
+        <b>${kacir(v.ad)}</b><br><span style="font-size: var(--text-sm); color: var(--color-ink-2);">${kacir(v.deger)} kayıt</span>
+      </div>`;
+    }
+    html += '</div>';
+
+    // Bölgesel verinin sınırları (bolgeselBaglam'dan gelir)
+    if (bolgeselBilgi && bolgeselBilgi.sinirlar && bolgeselBilgi.sinirlar.length > 0) {
+      html += '<h4 style="margin-top: var(--space-lg);">Bölgesel verilerin sınırları</h4>';
+      html += '<ul>';
+      bolgeselBilgi.sinirlar.forEach(s => {
+        html += `<li>${kacir(s)}</li>`;
+      });
+      html += '</ul>';
+    }
+  } else if (tip === 'evici') {
+    html += '<h4 style="margin-top: var(--space-lg);">Sizin verdiğiniz bilgiler</h4>';
+    html += '<div class="secenek-kartlar" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-md);">';
+    EV_ICI_KONTROL.forEach(m => {
+      const c = cevaplar[m.id];
+      if (c) {
+        const etiket = { evet: 'Evet', hayir: 'Hayır', emin_degilim: 'Emin değilim', gecerli_degil: 'Geçerli değil' }[c] || c;
+        html += `<div class="secenek-kart" style="padding: var(--space-md); border: 1px solid var(--color-border); border-radius: 8px;">
+          <b>${kacir(m.question)}</b><br><span style="font-size: var(--text-sm); color: var(--color-ink-2);">${etiket}</span>
+        </div>`;
+      }
+    });
+    html += '</div>';
+  }
+
+  html += '</section>';
+  return html;
+}
+
 /* ======================================================== parallax hero */
 /* Mevcut parallax IIFE korunur. */
 (function parallaxKur() {
@@ -1610,7 +2093,7 @@ function resetSession() {
 })();
 
 /* ======================================================== gezinme */
-function bolumGoster(id) {
+function bolumGoster(id, kaydir = true) {
   // 11 bölüm id'sini gizle, hedefi göster
   const bolumler = [
     'bolum-giris', 'bolum-gizlilik', 'bolum-adres', 'bolum-bolgesel',
@@ -1621,17 +2104,66 @@ function bolumGoster(id) {
     const el = document.getElementById(b);
     if (el) el.hidden = b !== id;
   }
+
+  // R1: Tek ekran kuralı — landing dışında hero ve veri gizle
+  const hero = document.getElementById('hero');
+  const veri = document.getElementById('veri');
+  const ayak = document.getElementById('ayak');
+  if (id === 'bolum-giris') {
+    if (hero) hero.hidden = false;
+    if (veri) veri.hidden = false;
+    if (ayak) ayak.hidden = false;
+    // Üst bar raporlar kısmını temizle
+    const ustRaporlar = document.getElementById('ust-raporlar');
+    if (ustRaporlar) ustRaporlar.innerHTML = '';
+  } else {
+    if (hero) hero.hidden = true;
+    if (veri) veri.hidden = true;
+    /* Uzun feragat bloğu her adımın altında tekrarlanınca ekranı şişiriyor;
+     * metinler zaten ilgili adımların içinde yer alıyor. */
+    if (ayak) ayak.hidden = true;
+  }
+
+  // R2: Adım göstergesi — landing'de boş, diğer yerlerde doldur
+  const ustAdim = document.getElementById('ust-adim');
+  if (ustAdim) {
+    if (id === 'bolum-giris') {
+      ustAdim.textContent = '';
+    } else if (id === 'bolum-adres') {
+      ustAdim.textContent = 'Binanı Anla — Adım 1/4 · Adres';
+    } else if (id === 'bolum-bolgesel') {
+      ustAdim.textContent = 'Binanı Anla — Adım 2/4 · Bölgesel bilgiler';
+    } else if (id === 'bolum-sorular') {
+      ustAdim.textContent = 'Binanı Anla — Adım 3/4 · Bina sorularınız';
+    } else if (id === 'bolum-gozden-gecir') {
+      ustAdim.textContent = 'Binanı Anla — Adım 3/4 · Cevapları gözden geçir';
+    } else if (id === 'bolum-yapisal-sonuc') {
+      ustAdim.textContent = 'Binanı Anla — Adım 4/4 · Rapor';
+    } else if (id === 'bolum-kontrol') {
+      ustAdim.textContent = 'Evini Hazırla — Kontrol Listesi';
+    } else if (id === 'bolum-ev-sonuc') {
+      ustAdim.textContent = 'Evini Hazırla — Hazırlık Planınız';
+    } else {
+      ustAdim.textContent = '';
+    }
+  }
+
   const hedef = document.getElementById(id);
   if (!hedef) return;
   hedef.classList.remove('adim');
   void hedef.offsetWidth;
   hedef.classList.add('adim');
-  hedef.scrollIntoView({
-    behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
-    block: 'start'
-  });
-  const bas = hedef.querySelector('h2');
-  if (bas) { bas.setAttribute('tabindex', '-1'); bas.focus({ preventScroll: true }); }
+  /* Açılışta kaydırmıyoruz: aksi halde sayfa kendini landing bölümüne
+   * kaydırıp hero'yu ekran dışında bırakıyordu. Kaydırma ve odak yalnızca
+   * kullanıcının tetiklediği geçişlerde anlamlı. */
+  if (kaydir) {
+    hedef.scrollIntoView({
+      behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+      block: 'start'
+    });
+    const bas = hedef.querySelector('h2');
+    if (bas) { bas.setAttribute('tabindex', '-1'); bas.focus({ preventScroll: true }); }
+  }
 }
 
 /* Geri/başa dön düğmeleri: data-git="<bölüm id>". Olay delegasyonu, çünkü
@@ -1732,12 +2264,39 @@ function adresKonumDurum(metin, tip) {
   el.dataset.tip = tip || '';
 }
 
+/* Nokta hiçbir ilçe poligonuna düşmezse (kıyı şeridi, poligon boşluğu,
+ * düşük doğruluk) en yakın ilçe merkezine düş. */
+function enYakinIlce(ilceler, lat, lon) {
+  let en = null, enKm = Infinity;
+  for (const il of ilceler) {
+    const halka = il.halkalar && il.halkalar[0];
+    if (!halka || !halka.length) continue;
+    let sLat = 0, sLon = 0;
+    for (const [a, o] of halka) { sLat += a; sLon += o; }
+    const d = mesafeKm(lat, lon, sLat / halka.length, sLon / halka.length);
+    if (d < enKm) { enKm = d; en = il; }
+  }
+  return enKm <= 25 ? en : null;
+}
+
 $('#adres-konum').addEventListener('click', ev => {
   const btn = ev.currentTarget;
+
   if (!navigator.geolocation) {
-    adresKonumDurum('Tarayıcınız konum özelliğini desteklemiyor. İlçeyi elle seçebilirsiniz.', 'hata');
+    adresKonumDurum('Tarayıcınız konum özelliğini desteklemiyor. İlçeyi listeden seçebilirsiniz.', 'hata');
     return;
   }
+  /* Tarayıcılar güvenli olmayan kaynakta konumu tamamen engeller. Dosyayı
+   * çift tıklayarak açtıysanız (file://) düğme hiç çalışmaz — bunu genel bir
+   * "alınamadı" mesajıyla geçiştirmek yerine nedenini söylüyoruz. */
+  if (!window.isSecureContext) {
+    adresKonumDurum(
+      'Konum yalnızca güvenli bağlantıda (https) çalışır. Sayfa dosyadan '
+      + 'açıldığı için tarayıcı konumu engelliyor. İlçeyi listeden seçebilirsiniz.',
+      'hata');
+    return;
+  }
+
   btn.disabled = true;
   const eskiMetin = btn.textContent;
   btn.textContent = 'Konum aranıyor…';
@@ -1748,28 +2307,46 @@ $('#adres-konum').addEventListener('click', ev => {
   navigator.geolocation.getCurrentPosition(
     konum => {
       bitir();
-      const ilce = ilceBul(D.ilceler, konum.coords.latitude, konum.coords.longitude);
+      const { latitude: lat, longitude: lon } = konum.coords;
+      const ilce = ilceBul(D.ilceler, lat, lon) || enYakinIlce(D.ilceler, lat, lon);
       if (!ilce) {
-        adresKonumDurum('Konumunuz İstanbul ilçe sınırlarının dışında görünüyor. İlçeyi elle seçebilirsiniz.', 'hata');
+        adresKonumDurum(
+          'Konumunuz İstanbul dışında görünüyor. Bu araç İstanbul ilçeleri için '
+          + 'hazırlandı; ilçeyi listeden seçerek devam edebilirsiniz.', 'hata');
         return;
       }
       $('#adres-ilce').value = ilce.ad;
       $('#adres-hata').hidden = true;
       adresKonumDurum(`İlçeniz ${ilce.ad} olarak seçildi. Yanlışsa listeden değiştirebilirsiniz.`, 'tamam');
     },
-    () => {
+    hata => {
       bitir();
-      adresKonumDurum('Konum alınamadı. İlçeyi listeden kendiniz seçebilirsiniz.', 'hata');
+      /* Üç ayrı neden, üç ayrı çözüm. Hepsine aynı metni basmak
+       * kullanıcıyı ne yapacağını bilmez halde bırakıyordu. */
+      let metin;
+      if (hata.code === hata.PERMISSION_DENIED) {
+        metin = 'Konum izni verilmedi. Tarayıcının adres çubuğundaki kilit '
+              + 'simgesinden izin verebilir ya da ilçeyi listeden seçebilirsiniz.';
+      } else if (hata.code === hata.POSITION_UNAVAILABLE) {
+        metin = 'Konum belirlenemedi. Cihazınızın konum servisleri kapalı '
+              + 'olabilir. İlçeyi listeden seçebilirsiniz.';
+      } else if (hata.code === hata.TIMEOUT) {
+        metin = 'Konum zamanında alınamadı. Tekrar deneyebilir veya ilçeyi '
+              + 'listeden seçebilirsiniz.';
+      } else {
+        metin = 'Konum alınamadı. İlçeyi listeden seçebilirsiniz.';
+      }
+      adresKonumDurum(metin, 'hata');
     },
-    { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 }
+    { enableHighAccuracy: false, timeout: 20000, maximumAge: 300000 }
   );
 });
 
 function yapisalAdresDogrulaVeDevam() {
   const ilce = kacir($('#adres-ilce').value.trim());
-  const mahalle = kacir($('#adres-mahalle').value.trim());
-  const sokak = kacir($('#adres-sokak').value.trim());
-  const bina = kacir($('#adres-bina').value.trim());
+  const mahalle = $('#adres-mahalle').value.trim();
+  const sokak = $('#adres-sokak').value.trim();
+  const bina = $('#adres-bina').value.trim();
 
   // İlçe seçili olmalı
   if (!$('#adres-ilce').value) {
@@ -1805,27 +2382,65 @@ function yapisalBolgeseBolumKur() {
     // Veri bulunamasa bile brief §9.2'nin zorunlu uyarısı ekranda kalmalı.
     icerik = `
       <p>Bu ilçe için bölgesel bilgi bulunamadı. Bina sorularına devam edebilirsiniz.</p>
-      <p class="bilgi-notu"><b>${kacir(BOLGESEL_UYARI)}</b></p>
+      <div class="alinti-kutu"><b>${kacir(BOLGESEL_UYARI)}</b></div>
     `;
   } else {
-    const nitelik = bg.nitelikselBaglam.map(n =>
-      `<div><b>${kacir(n.baslik)}</b><p>${kacir(n.metin)}</p></div>`
-    ).join('');
+    // nitelikselBaglam: { baslik, deger, metin } şekli — kartlar halinde
+    const nitelik = bg.nitelikselBaglam.map(n => `
+      <div class="secenek-kart" style="padding: var(--space-md);">
+        <b>${kacir(n.baslik)}</b>
+        ${n.deger ? `<div style="font-weight: 600; font-size: 1.1em; margin: 0.5rem 0; color: var(--color-accent);">${kacir(n.deger)}</div>` : ''}
+        <p style="margin: 0.5rem 0; font-size: var(--text-sm);">${kacir(n.metin)}</p>
+      </div>
+    `).join('');
+
+    // sinirlar listesi (4 madde)
+    const sinirlarHtml = bg.sinirlar && bg.sinirlar.length > 0
+      ? `<h4 style="margin-top: var(--space-lg);">Bölgesel verilerin sınırları</h4><ul>${bg.sinirlar.map(s => `<li>${kacir(s)}</li>`).join('')}</ul>`
+      : '';
 
     icerik = `
-      <h3>${kacir(bg.konumEtiketi)}</h3>
-      ${nitelik}
-      <p><em>Veri durumu:</em> ${bg.veriDurumu === 'mevcut' ? 'Mevcut' : 'Yok'}</p>
-      <p><em>Tarih:</em> ${kacir(bg.veriTarihi)}</p>
-      <p><em>Kaynak:</em> ${kacir(bg.kaynak)}</p>
-      <p class="bilgi-notu"><b>${kacir(BOLGESEL_UYARI)}</b></p>
-      <p style="color: var(--color-ink-3); font-size: var(--text-sm)">
-        ${kacir(BOLGESEL_KAPSAM)}
-      </p>
+      <div class="goz-ustu">Bölgesel Bilgiler</div>
+      <h2 style="margin-top: 0;">${kacir(bg.konumEtiketi)}</h2>
+      <div class="baslik-cizgi"></div>
+
+      <div class="secenek-kartlar" style="margin: var(--space-lg) 0;">
+        ${nitelik}
+      </div>
+
+      ${sinirlarHtml}
+
+      <div style="margin-top: var(--space-lg); padding-top: var(--space-lg); border-top: 1px solid var(--color-border); font-size: var(--text-sm); color: var(--color-ink-3);">
+        <p><b>Tarih:</b> ${kacir(bg.veriTarihi)}</p>
+        <p><b>Kaynaklar:</b><br>${kacir(bg.kaynak).replace(/\n/g, '<br>')}</p>
+      </div>
+
+      <div class="alinti-kutu">
+        <p><b>${kacir(BOLGESEL_UYARI)}</b></p>
+        <p style="margin: 0; font-size: var(--text-sm);">
+          ${kacir(BOLGESEL_KAPSAM)}
+        </p>
+      </div>
     `;
   }
 
   $('#bolgesel-govde').innerHTML = icerik;
+}
+
+/* ==================== yapısal adres başlığı */
+function yapisalAdresBolumBasligi() {
+  const baslik = document.createElement('div');
+  baslik.innerHTML = `
+    <div class="goz-ustu">Binanı Anla</div>
+    <h2 style="margin-top: 0;">Önce yaşadığın yeri bulalım.</h2>
+    <div class="baslik-cizgi"></div>
+  `;
+  const adresBolum = document.getElementById('bolum-adres');
+  if (adresBolum) {
+    const baslikEL = adresBolum.querySelector('.adres-baslik');
+    if (baslikEL) baslikEL.replaceWith(baslik);
+    else adresBolum.prepend(baslik);
+  }
 }
 
 /* ==================== yapısal sorular bölümü */
@@ -1847,9 +2462,12 @@ function yapisalSoruGoster() {
   const soru = YAPISAL_SORULAR[durum.yapisal.soruIndex];
   const cevaplanmis = durum.yapisal.cevaplar[soru.id];
 
+  // R3: Seçenek kartları — tümü ≤24 karakter ise data-kisa="1" koy
+  const tumKisa = soru.secenekler.every(s => s.etiket.length <= 24);
+
   const secenekler = soru.secenekler.map(s => `
     <label class="secenek">
-      <input type="radio" name="yapisal-soru" value="${kacir(s.deger)}"${cevaplanmis === s.deger ? ' checked' : ''}>
+      <input type="radio" name="yapisal-soru" value="${kacir(s.deger)}"${cevaplanmis === s.deger ? ' checked' : ''} aria-checked="${cevaplanmis === s.deger ? 'true' : 'false'}">
       <span class="metin"><span>${kacir(s.etiket)}</span></span>
     </label>
   `).join('');
@@ -1857,10 +2475,11 @@ function yapisalSoruGoster() {
   const yardim = soru.yardim ? `<p style="margin-top: var(--space-sm); color: var(--color-ink-3);">${kacir(soru.yardim)}</p>` : '';
 
   $('#soru-govde').innerHTML = `
-    <fieldset>
-      <legend>${kacir(soru.soru)}</legend>
-      ${yardim}
-      <div class="secenekler">
+    <div class="goz-ustu">Binanı Anla</div>
+    <h3 style="margin-top: 0;">${kacir(soru.soru)}</h3>
+    ${yardim}
+    <fieldset style="border: none; padding: 0; margin-top: var(--space-md);">
+      <div class="secenekler"${tumKisa ? ' data-kisa="1"' : ''}>
         ${secenekler}
       </div>
     </fieldset>
@@ -1915,7 +2534,7 @@ function yapisalGozdenGecirBolumKur() {
   const cevaplar = durum.yapisal.cevaplar;
 
   const adresBilgisi = `
-    <div>
+    <div class="secenek-kart" style="padding: var(--space-md);">
       <b>İlçe:</b> ${kacir(adres.ilce)}<br>
       ${adres.mahalle ? `<b>Mahalle:</b> ${kacir(adres.mahalle)}<br>` : ''}
       ${adres.sokak ? `<b>Sokak:</b> ${kacir(adres.sokak)}<br>` : ''}
@@ -1927,14 +2546,21 @@ function yapisalGozdenGecirBolumKur() {
     const c = cevaplar[s.id];
     if (!c) return null;
     const sec = s.secenekler.find(x => x.deger === c);
-    return `<div><b>${kacir(s.soru)}</b><br>${sec ? kacir(sec.etiket) : c}</div>`;
+    return `<div class="secenek-kart" style="padding: var(--space-sm);"><b>${kacir(s.soru)}</b><br><span style="font-size: var(--text-sm); color: var(--color-ink-2);">${sec ? kacir(sec.etiket) : c}</span></div>`;
   }).filter(Boolean).join('');
 
   $('#gozden-gecir-govde').innerHTML = `
-    <h3>Adres</h3>
+    <div class="goz-ustu">Binanı Anla</div>
+    <h2 style="margin-top: 0;">Cevapları gözden geçir</h2>
+    <div class="baslik-cizgi"></div>
+
+    <h3 style="margin-top: var(--space-lg);">Adres</h3>
     ${adresBilgisi}
-    <h3>Cevaplar</h3>
-    ${cevaplanmis}
+
+    <h3 style="margin-top: var(--space-lg);">Cevaplar</h3>
+    <div class="secenek-kartlar">
+      ${cevaplanmis}
+    </div>
   `;
 
 }
@@ -1950,7 +2576,7 @@ function yapisalSonucKur() {
     // Senaryo modu etiketi göster
     const etiketi = document.createElement('div');
     etiketi.id = 'senaryo-etiketi';
-    etiketi.textContent = '🔧 Senaryo Modu';
+    etiketi.textContent = 'SENARYO MODU · geliştirme';
     etiketi.style.cssText = 'position: fixed; top: 1rem; right: 1rem; background: #f59e0b; color: white; padding: 0.5rem 1rem; border-radius: 4px; z-index: 9999; font-size: var(--text-sm); font-weight: bold;';
     document.body.appendChild(etiketi);
   } else {
@@ -1959,6 +2585,29 @@ function yapisalSonucKur() {
   }
 
   yapisalSonucGoster();
+
+  // Üst bar rapor erişimi — iki raporun da linkini koy
+  const ustRaporlar = document.getElementById('ust-raporlar');
+  if (ustRaporlar) {
+    const evRaporBtn = durum.evici.cevaplar && Object.keys(durum.evici.cevaplar).length > 0
+      ? 'Ev Raporu'
+      : 'Ev Raporu';
+    ustRaporlar.innerHTML = `
+      <button id="ust-yapisal-rapor-btn">Bina Raporu</button>
+      <button id="ust-ev-rapor-btn">${evRaporBtn}</button>
+    `;
+    document.getElementById('ust-yapisal-rapor-btn').addEventListener('click', () => {
+      bolumGoster('bolum-yapisal-sonuc');
+    });
+    document.getElementById('ust-ev-rapor-btn').addEventListener('click', () => {
+      if (durum.evici.cevaplar && Object.keys(durum.evici.cevaplar).length > 0) {
+        bolumGoster('bolum-ev-sonuc');
+      } else {
+        eviciModulBasla();
+      }
+    });
+  }
+
   bolumGoster('bolum-yapisal-sonuc');
 }
 
@@ -1977,23 +2626,81 @@ function yapisalSonucGoster() {
   const missingInfo = sonuc.missingInformation.map(m => `<li>${kacir(m)}</li>`).join('');
   const recommendations = sonuc.recommendations.map(r => `<li>${kacir(r)}</li>`).join('');
 
+  // Sonuç durumu pill — düz metin, emoji yok
+  const durumetiket = sonuc.priority === 'priority_review' ? 'Öncelikli inceleme'
+    : sonuc.priority === 'detailed_review' ? 'Ayrıntılı değerlendirme'
+    : sonuc.priority === 'no_prominent_warning' ? 'Uyarı yok'
+    : 'Bilgi yetersiz';
+  const pillKlası = sonuc.priority === 'priority_review' ? 'data-oncelik="critical"'
+    : sonuc.priority === 'detailed_review' ? 'data-oncelik="high"'
+    : sonuc.priority === 'insufficient_information' ? 'data-oncelik="warning"'
+    : 'data-oncelik="neutral"';
+  const pilltag = `<span class="pill" ${pillKlası}>${kacir(durumetiket)}</span>`;
+
+  // Kentsel dönüşüm bölümü — numaralı rozetler ile
+  let kentselBolum = '';
+  if (typeof KENTSEL_DONUSUM !== 'undefined' && KENTSEL_DONUSUM) {
+    const adımlarHtml = KENTSEL_DONUSUM.adimlar
+      .map((a, i) => `
+        <div style="display: flex; gap: var(--space-md); margin-bottom: var(--space-lg);">
+          <div class="rozet-no" style="flex-shrink: 0;">${i + 1}</div>
+          <div>
+            <b>${kacir(a.baslik)}</b><br>${kacir(a.metin)}
+          </div>
+        </div>
+      `)
+      .join('');
+    const kaynakHtml = KENTSEL_DONUSUM.nereden
+      .map(k => `<li><b>${kacir(k.ad)}</b>${k.not ? ` — ${kacir(k.not)}` : ''}</li>`)
+      .join('');
+
+    kentselBolum = `
+      <div style="margin-top: var(--space-lg); padding-top: var(--space-lg); border-top: 1px solid var(--color-border);">
+        <div class="goz-ustu">Sonraki Adım</div>
+        <h3 style="margin-top: 0;">Sonraki Adımını Belirle</h3>
+        <div class="baslik-cizgi"></div>
+        <p>${kacir(KENTSEL_DONUSUM.giris)}</p>
+        ${adımlarHtml}
+        <h4>Başvurabilecek resmî kurumlar</h4>
+        <ul>
+          ${kaynakHtml}
+        </ul>
+        <div class="alinti-kutu" style="margin-top: var(--space-lg);">
+          <p><b>Uyarı</b></p>
+          <p style="font-style: italic;">
+            ${kacir(KENTSEL_DONUSUM.uyari)}
+          </p>
+          <p style="margin-top: var(--space-sm); font-size: var(--text-sm);">
+            ${kacir(KENTSEL_DONUSUM.sinir)}
+          </p>
+        </div>
+      </div>
+    `;
+  }
+
   $('#yapisal-sonuc-govde').innerHTML = `
-    <h3>${kacir(sonuc.title)}</h3>
-    <p>${kacir(sonuc.summary)}</p>
+    <div class="goz-ustu">Binanı Anla</div>
+    <h2 style="margin-top: 0;">${kacir(sonuc.title)}</h2>
+    <div class="baslik-cizgi"></div>
 
-    ${factors ? `<h4>Binanız hakkında bildiklerimiz</h4><div>${factors}</div>` : ''}
-    ${missingInfo ? `<h4>Bilmediğimiz veya doğrulayamadığımız bilgiler</h4><ul>${missingInfo}</ul>` : ''}
-    ${recommendations ? `<h4>Öneriler</h4><ul>${recommendations}</ul>` : ''}
+    <div class="panel-koyu" style="margin: var(--space-lg) 0;">
+      <p style="margin-top: 0;">${kacir(sonuc.summary)}</p>
+      <p>${pilltag}</p>
+    </div>
 
-    <p style="margin-top: var(--space-lg); font-size: var(--text-sm); color: var(--color-ink-3);">
-      ${kacir(YAPISAL_SINIR_METNI)}
-    </p>
+    ${factors ? `<h3 style="margin-top: var(--space-lg);">Binanız hakkında bildiklerimiz</h3><div>${factors}</div>` : ''}
+    ${missingInfo ? `<h3 style="margin-top: var(--space-lg);">Bilmediğimiz veya doğrulayamadığımız bilgiler</h3><ul>${missingInfo}</ul>` : ''}
+    ${recommendations ? `<h3 style="margin-top: var(--space-lg);">Öneriler</h3><ul>${recommendations}</ul>` : ''}
 
-    <p style="margin-top: var(--space-sm); font-size: var(--text-sm); color: var(--color-ink-3);">
-      Bu sonuç kesin bir hasar veya güvenlik tespiti değildir. Yetkili uzmanlar tarafından yapılacak teknik incelemelerle değerlendirilebilir.
-    </p>
+    <div class="alinti-kutu" style="margin-top: var(--space-lg);">
+      <p><b>Yöntemin sınırları</b></p>
+      <p>${kacir(YAPISAL_SINIR_METNI)}</p>
+      <p style="margin-top: var(--space-sm); font-size: var(--text-sm);">
+        Bu değerlendirme binanızın yapısal güvenliğinin profesyonel bir tespiti değildir ve bir prototiptir. Kesin sonuçlar için yetkili uzmanların yapacağı teknik incelemeler gereklidir.
+      </p>
+    </div>
 
-    <h4>Binanız için hangi değerlendirmeler yapılabilir?</h4>
+    <h3>Binanız için hangi değerlendirmeler yapılabilir?</h3>
     <div class="secenek-kartlar">
       ${DEGERLENDIRME_SECENEKLERI.map(d => `
         <div class="secenek-kart">
@@ -2001,13 +2708,35 @@ function yapisalSonucGoster() {
           <p><em>Ne için yardımcı olabilir:</em> ${kacir(d.neYapar)}</p>
           <p><em>Ne belirleyemez:</em> ${kacir(d.neYapmaz)}</p>
           ${d.not ? `<p style="color: var(--color-ink-3); font-size: var(--text-sm)">${kacir(d.not)}</p>` : ''}
+          <div class="pill-sira">
+            <span class="pill">${kacir(d.baslik)}</span>
+          </div>
         </div>`).join('')}
     </div>
-    <p style="font-size: var(--text-sm); color: var(--color-ink-3);">
-      ${kacir(DEGERLENDIRME_SECENEK_NOTU)}
-    </p>
+    <div class="alinti-kutu">
+      <p>${kacir(DEGERLENDIRME_SECENEK_NOTU)}</p>
+    </div>
+
+    ${kentselBolum}
+
+    <div style="margin-top: var(--space-lg);">
+      </div>
   `;
 
+  // R5: Rapor provenance bölümü — mount point'e koy
+  const provenanceHtml = raporProvenance('yapisal', durum.yapisal.cevaplar, adres, durum.yapisal.bolgesel);
+  const provenanceEl = document.getElementById('rapor-neye-dayaniyorsa-yapisal');
+  if (provenanceEl) {
+    provenanceEl.innerHTML = provenanceHtml;
+  }
+
+  // R6: PDF yazdırma butonu
+  const pdfBtnEl = document.getElementById('rapor-yazdir-yapisal');
+  if (pdfBtnEl) {
+    pdfBtnEl.addEventListener('click', () => {
+      window.print();
+    });
+  }
 }
 
 /* ==================== ev içi kontrol listesi modülü */
@@ -2029,6 +2758,7 @@ function eviciSoruGoster() {
   const madde = EV_ICI_KONTROL[durum.evici.soruIndex];
   const cevaplanmis = durum.evici.cevaplar[madde.id];
 
+  // R3: Ev içi seçenekler — 4 şık, tümü ≤24 karakter (bunu CSS kontrol eder)
   const secenekler = [
     { deger: 'evet', etiket: 'Evet' },
     { deger: 'hayir', etiket: 'Hayır' },
@@ -2036,20 +2766,23 @@ function eviciSoruGoster() {
     { deger: 'gecerli_degil', etiket: 'Bu ev için geçerli değil' },
   ];
 
+  const tumKisa = secenekler.every(s => s.etiket.length <= 24);
+
   const html = secenekler.map(s => `
     <label class="secenek">
-      <input type="radio" name="evici-soru" value="${s.deger}"${cevaplanmis === s.deger ? ' checked' : ''}>
+      <input type="radio" name="evici-soru" value="${s.deger}"${cevaplanmis === s.deger ? ' checked' : ''} aria-checked="${cevaplanmis === s.deger ? 'true' : 'false'}">
       <span class="metin"><span>${s.etiket}</span></span>
     </label>
   `).join('');
 
   $('#kontrol-govde').innerHTML = `
-    <fieldset>
-      <legend>${kacir(madde.question)}</legend>
-      <p style="margin-top: var(--space-sm); font-size: var(--text-sm); color: var(--color-ink-3);">
-        <b>Risk nedeni:</b> ${kacir(madde.riskReason)}
-      </p>
-      <div class="secenekler">
+    <div class="goz-ustu">Evini Hazırla</div>
+    <h3 style="margin-top: 0;">${kacir(madde.question)}</h3>
+    <p style="margin-top: var(--space-sm); font-size: var(--text-sm); color: var(--color-ink-3);">
+      <b>Risk nedeni:</b> ${kacir(madde.riskReason)}
+    </p>
+    <fieldset style="border: none; padding: 0;">
+      <div class="secenekler"${tumKisa ? ' data-kisa="1"' : ''}>
         ${html}
       </div>
     </fieldset>
@@ -2112,32 +2845,61 @@ function eviciSonucKur() {
   const ilkUc = ilkUcGorev(gorevler, durum.evici.tamamlananIdler);
 
   const gorevHtml = ilkUc.map(g => `
-    <div class="gorev-kart">
-      <h4>${kacir(g.baslik)}</h4>
-      <p>${kacir(g.aciklama)}</p>
-      <div>
-        <span class="oncelik-rozet" data-oncelik="${g.priority}">
-          ${g.priority === 'critical' ? 'Acil' : g.priority === 'high' ? 'Yüksek' : 'Orta'}
+    <div class="gorev-kart secenek-kart" style="padding: var(--space-md);">
+      <div style="display: flex; align-items: flex-start; gap: var(--space-sm);">
+        <span class="oncelik-rozet" data-oncelik="${g.priority}" style="flex-shrink: 0; border-radius: 50%; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: var(--text-sm);">
+          ${g.priority === 'critical' ? '1' : g.priority === 'high' ? '2' : '3'}
         </span>
-        ${g.professionalSupport ? '<span style="font-size: var(--text-sm); color: var(--color-ink-3);">👤 Uzman desteği önerilir</span>' : ''}
+        <div style="flex: 1;">
+          <h4 style="margin: 0 0 0.5rem 0;">${kacir(g.baslik)}</h4>
+          <p style="margin: 0.5rem 0; font-size: var(--text-sm);">${kacir(g.aciklama)}</p>
+          <div style="margin: 0.5rem 0; display: flex; flex-wrap: wrap; gap: var(--space-sm);">
+            <span class="pill" data-oncelik="${g.priority}">
+              ${g.priority === 'critical' ? 'Acil' : g.priority === 'high' ? 'Yüksek' : 'Orta'}
+            </span>
+            ${g.professionalSupport ? '<span class="pill">Uzman desteği önerilir</span>' : ''}
+          </div>
+          <button class="tamamla-btn" data-gorev-id="${kacir(g.id)}" style="margin-top: 0.5rem;">
+            Tamamlandı olarak işaretle
+          </button>
+        </div>
       </div>
-      <button class="tamamla-btn" data-gorev-id="${kacir(g.id)}">
-        Tamamlandı olarak işaretle
-      </button>
     </div>
   `).join('');
 
-  $('#ev-sonuc-govde').innerHTML = `
-    <h3>Hazırlık ilerlemeniz</h3>
-    <p>${kacir(yanitlanmis)} / ${EV_ICI_KONTROL.length} soru yanıtlandı</p>
-    <p><strong>${tamamlanan} / ${uygulanabilir} önlem tamamlandı (%${yuzde})</strong></p>
-    <p style="font-size: var(--text-sm); color: var(--color-ink-3);">
-      ${kacir(YUZDE_ACIKLAMASI)}
-    </p>
-
-    <h4>Yapabileceğiniz ilk adımlar</h4>
-    ${gorevHtml || '<p>Tüm ön lemleri tamamladınız.</p>'}
+  const ilerlemePanel = `
+    <div class="panel-koyu" style="margin: var(--space-lg) 0; padding: var(--space-md);">
+      <p style="margin-top: 0;"><b>Hazırlık ilerlemeniz</b></p>
+      <p>${kacir(yanitlanmis)} / ${EV_ICI_KONTROL.length} soru yanıtlandı</p>
+      <p style="font-size: 1.2em;"><strong>${tamamlanan} / ${uygulanabilir} önlem tamamlandı (%${yuzde})</strong></p>
+      <div class="alinti-kutu" style="margin-top: var(--space-sm);">
+        <p style="margin: 0; font-size: var(--text-sm);">
+          ${kacir(YUZDE_ACIKLAMASI)}
+        </p>
+      </div>
+    </div>
   `;
+
+  $('#ev-sonuc-govde').innerHTML = `
+    <div class="goz-ustu">Rapor</div>
+    <h2 style="margin-top: 0;">Evini Hazırla — Hazırlık Planınız</h2>
+    <div class="baslik-cizgi"></div>
+
+    ${ilerlemePanel}
+
+    <h3 style="margin-top: var(--space-lg);">Yapabileceğiniz ilk adımlar</h3>
+    ${gorevHtml || '<p style="font-style: italic; color: var(--color-ink-3);">Tüm önerileri tamamladınız. Koşullar değiştiğinde kontrol listesini yeniden gözden geçirebilirsiniz.</p>'}
+
+    <div style="margin-top: var(--space-lg);">
+      </div>
+  `;
+
+  // R5: Rapor provenance bölümü — mount point'e koy
+  const provenanceHtml = raporProvenance('evici', durum.evici.cevaplar, null, null);
+  const provenanceEl = document.getElementById('rapor-neye-dayaniyorsa-ev');
+  if (provenanceEl) {
+    provenanceEl.innerHTML = provenanceHtml;
+  }
 
   // Tamamla butonlarını bağla
   $$('.tamamla-btn').forEach(btn => {
@@ -2150,6 +2912,34 @@ function eviciSonucKur() {
       $('#duyuru').textContent = 'Adım tamamlandı. Hazırlık listeniz güncellendi.';
     });
   });
+
+  // Üst bar rapor erişimi
+  const ustRaporlar = document.getElementById('ust-raporlar');
+  if (ustRaporlar) {
+    const yapisalBtn = durum.yapisal.sonuc ? 'Bina Raporu' : 'Bina Raporu';
+    ustRaporlar.innerHTML = `
+      <button id="ust-yapisal-rapor-btn">${yapisalBtn}</button>
+      <button id="ust-ev-rapor-btn">Ev Raporu</button>
+    `;
+    document.getElementById('ust-yapisal-rapor-btn').addEventListener('click', () => {
+      if (durum.yapisal.sonuc) {
+        bolumGoster('bolum-yapisal-sonuc');
+      } else {
+        yapisalModulBasla();
+      }
+    });
+    document.getElementById('ust-ev-rapor-btn').addEventListener('click', () => {
+      bolumGoster('bolum-ev-sonuc');
+    });
+  }
+
+  // R6: PDF yazdırma butonu
+  const pdfBtnEl = document.getElementById('rapor-yazdir-ev');
+  if (pdfBtnEl) {
+    pdfBtnEl.addEventListener('click', () => {
+      window.print();
+    });
+  }
 }
 
 /* ==================== birleşik özet */
@@ -2161,20 +2951,58 @@ function ozet() {
   const tamamlanan = tamamlananOnlemSayisi(durum.evici.cevaplar, durum.evici.tamamlananIdler);
   const evMetin = `${tamamlanan} / ${EV_ICI_KONTROL.length} önlem tamamlandı`;
 
+  // R4: Rapor re-access butonları — var olan raporu aç veya modüle yönlendir
+  const yapisalBtn = durum.yapisal.sonuc
+    ? `<button id="ozet-yapisal-rapor">Bina Raporu (mevcut)</button>`
+    : `<button id="ozet-yapisal-rapor">Bina Raporu</button>`;
+
+  const evBtn = durum.evici.cevaplar && Object.keys(durum.evici.cevaplar).length > 0
+    ? `<button id="ozet-ev-rapor">Ev Hazırlık Raporu (mevcut)</button>`
+    : `<button id="ozet-ev-rapor">Ev Hazırlık Raporu</button>`;
+
   $('#ozet-govde').innerHTML = `
     <h3>Binanız</h3>
     <p>${yapisalMetin}</p>
-    <button id="ozet-yapisala-don">Bina değerlendirmesine dön</button>
+    ${yapisalBtn}
 
     <h3>Eviniz</h3>
     <p>${evMetin}</p>
-    <button id="ozet-evicine-don">Yapılacaklar listeme dön</button>
+    ${evBtn}
 
     <p style="margin-top: var(--space-lg); font-style: italic;">
       ${kacir(OZET_DESTEK)}
     </p>
   `;
 
+  // R4: Rapor erişim butonlarını bağla
+  const yapisalRaporBtn = document.getElementById('ozet-yapisal-rapor');
+  if (yapisalRaporBtn) {
+    yapisalRaporBtn.addEventListener('click', () => {
+      if (durum.yapisal.sonuc) {
+        // Var olan raporu aç
+        bolumGoster('bolum-yapisal-sonuc');
+      } else {
+        // Modülü başlat
+        yapisalModulBasla();
+      }
+    });
+  }
+
+  const evRaporBtn = document.getElementById('ozet-ev-rapor');
+  if (evRaporBtn) {
+    evRaporBtn.addEventListener('click', () => {
+      if (durum.evici.cevaplar && Object.keys(durum.evici.cevaplar).length > 0) {
+        // Var olan raporu aç
+        bolumGoster('bolum-ev-sonuc');
+      } else {
+        // Modülü başlat
+        eviciModulBasla();
+      }
+    });
+  }
+
+  $('#ozet-yapisala-don').hidden = false;
+  $('#ozet-evicine-don').hidden = false;
 
   bolumGoster('bolum-ozet');
 }
@@ -2189,6 +3017,27 @@ $('#yapisal-sonuc-devam').addEventListener('click', () => eviciModulBasla());
 $('#ozet-yapisala-don').addEventListener('click', () => yapisalModulBasla());
 $('#ozet-evicine-don').addEventListener('click', () => eviciModulBasla());
 $('#ev-sonuc-ozet').addEventListener('click', ozet);
+
+/* ==================== R8: Tema toggle */
+$('#tema-degistir')?.addEventListener('click', () => {
+  const html = document.documentElement;
+  const tema = html.dataset.tema || 'sade';
+  const yeniTema = tema === 'sade' ? 'canli' : 'sade';
+  html.dataset.tema = yeniTema;
+
+  // Düğme metnini ve aria-pressed'i güncelle
+  const btn = document.getElementById('tema-degistir');
+  if (btn) {
+    btn.textContent = yeniTema === 'sade' ? 'Canlı tema' : 'Sade tema';
+    btn.setAttribute('aria-pressed', yeniTema === 'canli' ? 'true' : 'false');
+  }
+
+  // Duyuru
+  const duyuru = document.getElementById('duyuru');
+  if (duyuru) {
+    duyuru.textContent = `Tema ${yeniTema === 'sade' ? 'sade' : 'canlı'} olarak değiştirildi.`;
+  }
+});
 
 /* ==================== sıfırlama */
 $('#sifirla').addEventListener('click', () => {
@@ -2213,7 +3062,7 @@ $('#sifirla-vazgec').addEventListener('click', () => {
 document.addEventListener('DOMContentLoaded', () => {
   // ?scenario=... verildiyse doğrudan ilgili yapısal sonuç durumunu aç.
   if (dev_scenarioKontrol()) { yapisalSonucKur(); return; }
-  bolumGoster('bolum-giris');
+  bolumGoster('bolum-giris', false);
 });
 
 </script>

@@ -77,16 +77,16 @@ def main():
     yazilan.append("apple-touch-icon.png")
 
     manifest = {
-        "name": "depremlab — deprem risk değerlendirmesi",
-        "short_name": "depremlab",
-        "description": "İstanbul için konum, zemin, fay uzaklığı ve bina "
+        "name": "Deprem Rehberim",
+        "short_name": "Deprem Rehberim",
+        "description": "Depreme hazırlık veri ile değil, eylemle başlar. Binanı anla, evini hazırla, sonraki adımını belirle."
                        "bilgisiyle deprem risk değerlendirmesi.",
         "start_url": "./index.html",
         "scope": "./",
         "display": "standalone",
         "orientation": "portrait-primary",
-        "background_color": "#faf7f1",
-        "theme_color": "#faf7f1",
+        "background_color": "#f5f7fa",
+        "theme_color": "#f5f7fa",
         "lang": "tr",
         "dir": "ltr",
         "categories": ["utilities", "education"],
@@ -101,7 +101,7 @@ def main():
              "type": "image/png", "purpose": "maskable"},
         ],
         "shortcuts": [
-            {"name": "Bina değerlendirmesi", "url": "./index.html#basla"},
+            {"name": "Binanı anla", "url": "./index.html"},
             {"name": "Harita", "url": "./harita.html"},
         ],
     }
