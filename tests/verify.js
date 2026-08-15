@@ -286,6 +286,10 @@ t('çıktıda Leaflet CDN yok (wizard)', !/unpkg\.com\/leaflet/.test(html));
 t('§22.28 Türkçe diakritik korunmuş', /değerlendirme/.test(html) && /İstanbul|ilçe/.test(html));
 t('D veri paketi gömülü', /const D = \{/.test(html));
 
+const manifest = JSON.parse(oku('manifest.webmanifest'));
+t('manifest açıklaması eski cümle kalıntısı taşımıyor',
+  !manifest.description.includes('.bilgisiyle'), manifest.description);
+
 console.log(`\n${'='.repeat(46)}`);
 console.log(`GEÇTİ: ${gecti}   KALDI: ${kaldi}`);
 process.exit(kaldi ? 1 : 0);

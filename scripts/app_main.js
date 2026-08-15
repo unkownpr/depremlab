@@ -78,37 +78,37 @@ const RAPOR_KAYNAKLAR = {
 function raporProvenance(tip, cevaplar, adres, bolgeselBilgi) {
   let html = '<section class="rapor-provenance">';
   html += '<div class="goz-ustu">Veri Kaynakları</div>';
-  html += '<h3 style="margin-top: 0;">Bu rapor neye dayanıyor</h3>';
+  html += '<h3>Bu rapor neye dayanıyor</h3>';
   html += '<div class="baslik-cizgi"></div>';
 
   // Kullanıcının yanıtları
   if (tip === 'yapisal') {
-    html += '<h4 style="margin-top: var(--space-lg);">Sizin verdiğiniz bilgiler</h4>';
-    html += '<div class="secenek-kartlar" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-md);">';
+    html += '<h4>Sizin verdiğiniz bilgiler</h4>';
+    html += '<div class="secenek-kartlar" class="kart-izgara">';
     YAPISAL_SORULAR.forEach(s => {
       const c = cevaplar[s.id];
       if (c) {
         const sec = s.secenekler.find(x => x.deger === c);
-        html += `<div class="secenek-kart" style="padding: var(--space-md); border: 1px solid var(--color-border); border-radius: 8px;">
-          <b>${kacir(s.soru)}</b><br><span style="font-size: var(--text-sm); color: var(--color-ink-2);">${sec ? kacir(sec.etiket) : c}</span>
+        html += `<div class="secenek-kart veri-kart" >
+          <b>${kacir(s.soru)}</b><span class="metin-ikincil">${sec ? kacir(sec.etiket) : c}</span>
         </div>`;
       }
     });
     html += '</div>';
 
     // Bölgesel kaynaklar (sadece yapısal)
-    html += '<h4 style="margin-top: var(--space-lg);">Bölgesel veri kaynakları</h4>';
-    html += '<div class="secenek-kartlar" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-md);">';
+    html += '<h4>Bölgesel veri kaynakları</h4>';
+    html += '<div class="secenek-kartlar" class="kart-izgara dar">';
     for (const [k, v] of Object.entries(RAPOR_KAYNAKLAR.yapisal)) {
-      html += `<div class="secenek-kart" style="padding: var(--space-md); border: 1px solid var(--color-border); border-radius: 8px;">
-        <b>${kacir(v.ad)}</b><br><span style="font-size: var(--text-sm); color: var(--color-ink-2);">${kacir(v.deger)} kayıt</span>
+      html += `<div class="secenek-kart veri-kart" >
+        <b>${kacir(v.ad)}</b><span class="metin-ikincil">${kacir(v.deger)} kayıt</span>
       </div>`;
     }
     html += '</div>';
 
     // Bölgesel verinin sınırları (bolgeselBaglam'dan gelir)
     if (bolgeselBilgi && bolgeselBilgi.sinirlar && bolgeselBilgi.sinirlar.length > 0) {
-      html += '<h4 style="margin-top: var(--space-lg);">Bölgesel verilerin sınırları</h4>';
+      html += '<h4>Bölgesel verilerin sınırları</h4>';
       html += '<ul>';
       bolgeselBilgi.sinirlar.forEach(s => {
         html += `<li>${kacir(s)}</li>`;
@@ -116,14 +116,14 @@ function raporProvenance(tip, cevaplar, adres, bolgeselBilgi) {
       html += '</ul>';
     }
   } else if (tip === 'evici') {
-    html += '<h4 style="margin-top: var(--space-lg);">Sizin verdiğiniz bilgiler</h4>';
-    html += '<div class="secenek-kartlar" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-md);">';
+    html += '<h4>Sizin verdiğiniz bilgiler</h4>';
+    html += '<div class="secenek-kartlar" class="kart-izgara">';
     EV_ICI_KONTROL.forEach(m => {
       const c = cevaplar[m.id];
       if (c) {
         const etiket = { evet: 'Evet', hayir: 'Hayır', emin_degilim: 'Emin değilim', gecerli_degil: 'Geçerli değil' }[c] || c;
-        html += `<div class="secenek-kart" style="padding: var(--space-md); border: 1px solid var(--color-border); border-radius: 8px;">
-          <b>${kacir(m.question)}</b><br><span style="font-size: var(--text-sm); color: var(--color-ink-2);">${etiket}</span>
+        html += `<div class="secenek-kart veri-kart" >
+          <b>${kacir(m.question)}</b><span class="metin-ikincil">${etiket}</span>
         </div>`;
       }
     });
@@ -496,37 +496,37 @@ function yapisalBolgeseBolumKur() {
   } else {
     // nitelikselBaglam: { baslik, deger, metin } şekli — kartlar halinde
     const nitelik = bg.nitelikselBaglam.map(n => `
-      <div class="secenek-kart" style="padding: var(--space-md);">
+      <div class="secenek-kart veri-kart" style="padding: var(--space-md);">
         <b>${kacir(n.baslik)}</b>
         ${n.deger ? `<div style="font-weight: 600; font-size: 1.1em; margin: 0.5rem 0; color: var(--color-accent);">${kacir(n.deger)}</div>` : ''}
-        <p style="margin: 0.5rem 0; font-size: var(--text-sm);">${kacir(n.metin)}</p>
+        <p class="metin-kucuk">${kacir(n.metin)}</p>
       </div>
     `).join('');
 
     // sinirlar listesi (4 madde)
     const sinirlarHtml = bg.sinirlar && bg.sinirlar.length > 0
-      ? `<h4 style="margin-top: var(--space-lg);">Bölgesel verilerin sınırları</h4><ul>${bg.sinirlar.map(s => `<li>${kacir(s)}</li>`).join('')}</ul>`
+      ? `<h4>Bölgesel verilerin sınırları</h4><ul>${bg.sinirlar.map(s => `<li>${kacir(s)}</li>`).join('')}</ul>`
       : '';
 
     icerik = `
       <div class="goz-ustu">Bölgesel Bilgiler</div>
-      <h2 style="margin-top: 0;">${kacir(bg.konumEtiketi)}</h2>
+      <h2>${kacir(bg.konumEtiketi)}</h2>
       <div class="baslik-cizgi"></div>
 
-      <div class="secenek-kartlar" style="margin: var(--space-lg) 0;">
+      <div class="secenek-kartlar">
         ${nitelik}
       </div>
 
       ${sinirlarHtml}
 
-      <div style="margin-top: var(--space-lg); padding-top: var(--space-lg); border-top: 1px solid var(--color-border); font-size: var(--text-sm); color: var(--color-ink-3);">
+      <div class="bolum-ayrac metin-kucuk">
         <p><b>Tarih:</b> ${kacir(bg.veriTarihi)}</p>
-        <p><b>Kaynaklar:</b><br>${kacir(bg.kaynak).replace(/\n/g, '<br>')}</p>
+        <p><b>Kaynaklar:</b>${kacir(bg.kaynak).replace(/\n/g, '<br>')}</p>
       </div>
 
       <div class="alinti-kutu">
         <p><b>${kacir(BOLGESEL_UYARI)}</b></p>
-        <p style="margin: 0; font-size: var(--text-sm);">
+        <p class="metin-kucuk">
           ${kacir(BOLGESEL_KAPSAM)}
         </p>
       </div>
@@ -541,7 +541,7 @@ function yapisalAdresBolumBasligi() {
   const baslik = document.createElement('div');
   baslik.innerHTML = `
     <div class="goz-ustu">Binanı Anla</div>
-    <h2 style="margin-top: 0;">Önce yaşadığın yeri bulalım.</h2>
+    <h2>Önce yaşadığın yeri bulalım.</h2>
     <div class="baslik-cizgi"></div>
   `;
   const adresBolum = document.getElementById('bolum-adres');
@@ -581,11 +581,11 @@ function yapisalSoruGoster() {
     </label>
   `).join('');
 
-  const yardim = soru.yardim ? `<p style="margin-top: var(--space-sm); color: var(--color-ink-3);">${kacir(soru.yardim)}</p>` : '';
+  const yardim = soru.yardim ? `<p class="metin-kucuk">${kacir(soru.yardim)}</p>` : '';
 
   $('#soru-govde').innerHTML = `
     <div class="goz-ustu">Binanı Anla</div>
-    <h3 style="margin-top: 0;">${kacir(soru.soru)}</h3>
+    <h3>${kacir(soru.soru)}</h3>
     ${yardim}
     <fieldset style="border: none; padding: 0; margin-top: var(--space-md);">
       <div class="secenekler"${tumKisa ? ' data-kisa="1"' : ''}>
@@ -643,7 +643,7 @@ function yapisalGozdenGecirBolumKur() {
   const cevaplar = durum.yapisal.cevaplar;
 
   const adresBilgisi = `
-    <div class="secenek-kart" style="padding: var(--space-md);">
+    <div class="secenek-kart veri-kart" style="padding: var(--space-md);">
       <b>İlçe:</b> ${kacir(adres.ilce)}<br>
       ${adres.mahalle ? `<b>Mahalle:</b> ${kacir(adres.mahalle)}<br>` : ''}
       ${adres.sokak ? `<b>Sokak:</b> ${kacir(adres.sokak)}<br>` : ''}
@@ -655,18 +655,18 @@ function yapisalGozdenGecirBolumKur() {
     const c = cevaplar[s.id];
     if (!c) return null;
     const sec = s.secenekler.find(x => x.deger === c);
-    return `<div class="secenek-kart" style="padding: var(--space-sm);"><b>${kacir(s.soru)}</b><br><span style="font-size: var(--text-sm); color: var(--color-ink-2);">${sec ? kacir(sec.etiket) : c}</span></div>`;
+    return `<div class="secenek-kart veri-kart" style="padding: var(--space-sm);"><b>${kacir(s.soru)}</b><span class="metin-ikincil">${sec ? kacir(sec.etiket) : c}</span></div>`;
   }).filter(Boolean).join('');
 
   $('#gozden-gecir-govde').innerHTML = `
     <div class="goz-ustu">Binanı Anla</div>
-    <h2 style="margin-top: 0;">Cevapları gözden geçir</h2>
+    <h2>Cevapları gözden geçir</h2>
     <div class="baslik-cizgi"></div>
 
-    <h3 style="margin-top: var(--space-lg);">Adres</h3>
+    <h3>Adres</h3>
     ${adresBilgisi}
 
-    <h3 style="margin-top: var(--space-lg);">Cevaplar</h3>
+    <h3>Cevaplar</h3>
     <div class="secenek-kartlar">
       ${cevaplanmis}
     </div>
@@ -754,7 +754,7 @@ function yapisalSonucGoster() {
         <div style="display: flex; gap: var(--space-md); margin-bottom: var(--space-lg);">
           <div class="rozet-no" style="flex-shrink: 0;">${i + 1}</div>
           <div>
-            <b>${kacir(a.baslik)}</b><br>${kacir(a.metin)}
+            <b>${kacir(a.baslik)}</b>${kacir(a.metin)}
           </div>
         </div>
       `)
@@ -764,9 +764,9 @@ function yapisalSonucGoster() {
       .join('');
 
     kentselBolum = `
-      <div style="margin-top: var(--space-lg); padding-top: var(--space-lg); border-top: 1px solid var(--color-border);">
+      <div class="bolum-ayrac">
         <div class="goz-ustu">Sonraki Adım</div>
-        <h3 style="margin-top: 0;">Sonraki Adımını Belirle</h3>
+        <h3>Sonraki Adımını Belirle</h3>
         <div class="baslik-cizgi"></div>
         <p>${kacir(KENTSEL_DONUSUM.giris)}</p>
         ${adımlarHtml}
@@ -774,12 +774,12 @@ function yapisalSonucGoster() {
         <ul>
           ${kaynakHtml}
         </ul>
-        <div class="alinti-kutu" style="margin-top: var(--space-lg);">
+        <div class="alinti-kutu">
           <p><b>Uyarı</b></p>
           <p style="font-style: italic;">
             ${kacir(KENTSEL_DONUSUM.uyari)}
           </p>
-          <p style="margin-top: var(--space-sm); font-size: var(--text-sm);">
+          <p class="metin-kucuk">
             ${kacir(KENTSEL_DONUSUM.sinir)}
           </p>
         </div>
@@ -789,22 +789,22 @@ function yapisalSonucGoster() {
 
   $('#yapisal-sonuc-govde').innerHTML = `
     <div class="goz-ustu">Binanı Anla</div>
-    <h2 style="margin-top: 0;">${kacir(sonuc.title)}</h2>
+    <h2>${kacir(sonuc.title)}</h2>
     <div class="baslik-cizgi"></div>
 
-    <div class="panel-koyu" style="margin: var(--space-lg) 0;">
-      <p style="margin-top: 0;">${kacir(sonuc.summary)}</p>
+    <div class="panel-koyu">
+      <p>${kacir(sonuc.summary)}</p>
       <p>${pilltag}</p>
     </div>
 
-    ${factors ? `<h3 style="margin-top: var(--space-lg);">Binanız hakkında bildiklerimiz</h3><div>${factors}</div>` : ''}
-    ${missingInfo ? `<h3 style="margin-top: var(--space-lg);">Bilmediğimiz veya doğrulayamadığımız bilgiler</h3><ul>${missingInfo}</ul>` : ''}
-    ${recommendations ? `<h3 style="margin-top: var(--space-lg);">Öneriler</h3><ul>${recommendations}</ul>` : ''}
+    ${factors ? `<h3>Binanız hakkında bildiklerimiz</h3><div>${factors}</div>` : ''}
+    ${missingInfo ? `<h3>Bilmediğimiz veya doğrulayamadığımız bilgiler</h3><ul>${missingInfo}</ul>` : ''}
+    ${recommendations ? `<h3>Öneriler</h3><ul>${recommendations}</ul>` : ''}
 
-    <div class="alinti-kutu" style="margin-top: var(--space-lg);">
+    <div class="alinti-kutu">
       <p><b>Yöntemin sınırları</b></p>
       <p>${kacir(YAPISAL_SINIR_METNI)}</p>
-      <p style="margin-top: var(--space-sm); font-size: var(--text-sm);">
+      <p class="metin-kucuk">
         Bu değerlendirme binanızın yapısal güvenliğinin profesyonel bir tespiti değildir ve bir prototiptir. Kesin sonuçlar için yetkili uzmanların yapacağı teknik incelemeler gereklidir.
       </p>
     </div>
@@ -812,7 +812,7 @@ function yapisalSonucGoster() {
     <h3>Binanız için hangi değerlendirmeler yapılabilir?</h3>
     <div class="secenek-kartlar">
       ${DEGERLENDIRME_SECENEKLERI.map(d => `
-        <div class="secenek-kart">
+        <div class="secenek-kart veri-kart">
           <b>${kacir(d.baslik)}</b>
           <p><em>Ne için yardımcı olabilir:</em> ${kacir(d.neYapar)}</p>
           <p><em>Ne belirleyemez:</em> ${kacir(d.neYapmaz)}</p>
@@ -828,7 +828,7 @@ function yapisalSonucGoster() {
 
     ${kentselBolum}
 
-    <div style="margin-top: var(--space-lg);">
+    <div>
       </div>
   `;
 
@@ -839,13 +839,6 @@ function yapisalSonucGoster() {
     provenanceEl.innerHTML = provenanceHtml;
   }
 
-  // R6: PDF yazdırma butonu
-  const pdfBtnEl = document.getElementById('rapor-yazdir-yapisal');
-  if (pdfBtnEl) {
-    pdfBtnEl.addEventListener('click', () => {
-      window.print();
-    });
-  }
 }
 
 /* ==================== ev içi kontrol listesi modülü */
@@ -886,8 +879,8 @@ function eviciSoruGoster() {
 
   $('#kontrol-govde').innerHTML = `
     <div class="goz-ustu">Evini Hazırla</div>
-    <h3 style="margin-top: 0;">${kacir(madde.question)}</h3>
-    <p style="margin-top: var(--space-sm); font-size: var(--text-sm); color: var(--color-ink-3);">
+    <h3>${kacir(madde.question)}</h3>
+    <p class="metin-kucuk">
       <b>Risk nedeni:</b> ${kacir(madde.riskReason)}
     </p>
     <fieldset style="border: none; padding: 0;">
@@ -960,9 +953,9 @@ function eviciSonucKur() {
           ${g.priority === 'critical' ? '1' : g.priority === 'high' ? '2' : '3'}
         </span>
         <div style="flex: 1;">
-          <h4 style="margin: 0 0 0.5rem 0;">${kacir(g.baslik)}</h4>
-          <p style="margin: 0.5rem 0; font-size: var(--text-sm);">${kacir(g.aciklama)}</p>
-          <div style="margin: 0.5rem 0; display: flex; flex-wrap: wrap; gap: var(--space-sm);">
+          <h4>${kacir(g.baslik)}</h4>
+          <p class="metin-kucuk">${kacir(g.aciklama)}</p>
+          <div class="pill-sira">
             <span class="pill" data-oncelik="${g.priority}">
               ${g.priority === 'critical' ? 'Acil' : g.priority === 'high' ? 'Yüksek' : 'Orta'}
             </span>
@@ -978,11 +971,11 @@ function eviciSonucKur() {
 
   const ilerlemePanel = `
     <div class="panel-koyu" style="margin: var(--space-lg) 0; padding: var(--space-md);">
-      <p style="margin-top: 0;"><b>Hazırlık ilerlemeniz</b></p>
+      <p><b>Hazırlık ilerlemeniz</b></p>
       <p>${kacir(yanitlanmis)} / ${EV_ICI_KONTROL.length} soru yanıtlandı</p>
       <p style="font-size: 1.2em;"><strong>${tamamlanan} / ${uygulanabilir} önlem tamamlandı (%${yuzde})</strong></p>
-      <div class="alinti-kutu" style="margin-top: var(--space-sm);">
-        <p style="margin: 0; font-size: var(--text-sm);">
+      <div class="alinti-kutu">
+        <p class="metin-kucuk">
           ${kacir(YUZDE_ACIKLAMASI)}
         </p>
       </div>
@@ -991,15 +984,15 @@ function eviciSonucKur() {
 
   $('#ev-sonuc-govde').innerHTML = `
     <div class="goz-ustu">Rapor</div>
-    <h2 style="margin-top: 0;">Evini Hazırla — Hazırlık Planınız</h2>
+    <h2>Evini Hazırla — Hazırlık Planınız</h2>
     <div class="baslik-cizgi"></div>
 
     ${ilerlemePanel}
 
-    <h3 style="margin-top: var(--space-lg);">Yapabileceğiniz ilk adımlar</h3>
+    <h3>Yapabileceğiniz ilk adımlar</h3>
     ${gorevHtml || '<p style="font-style: italic; color: var(--color-ink-3);">Tüm önerileri tamamladınız. Koşullar değiştiğinde kontrol listesini yeniden gözden geçirebilirsiniz.</p>'}
 
-    <div style="margin-top: var(--space-lg);">
+    <div>
       </div>
   `;
 
@@ -1041,14 +1034,6 @@ function eviciSonucKur() {
       bolumGoster('bolum-ev-sonuc');
     });
   }
-
-  // R6: PDF yazdırma butonu
-  const pdfBtnEl = document.getElementById('rapor-yazdir-ev');
-  if (pdfBtnEl) {
-    pdfBtnEl.addEventListener('click', () => {
-      window.print();
-    });
-  }
 }
 
 /* ==================== birleşik özet */
@@ -1078,7 +1063,7 @@ function ozet() {
     <p>${evMetin}</p>
     ${evBtn}
 
-    <p style="margin-top: var(--space-lg); font-style: italic;">
+    <p class="metin-vurgu">
       ${kacir(OZET_DESTEK)}
     </p>
   `;
@@ -1126,6 +1111,8 @@ $('#yapisal-sonuc-devam').addEventListener('click', () => eviciModulBasla());
 $('#ozet-yapisala-don').addEventListener('click', () => yapisalModulBasla());
 $('#ozet-evicine-don').addEventListener('click', () => eviciModulBasla());
 $('#ev-sonuc-ozet').addEventListener('click', ozet);
+$('#rapor-yazdir-yapisal').addEventListener('click', () => window.print());
+$('#rapor-yazdir-ev').addEventListener('click', () => window.print());
 
 /* ==================== R8: Tema toggle */
 $('#tema-degistir')?.addEventListener('click', () => {

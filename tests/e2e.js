@@ -141,6 +141,7 @@ const t = (ad, ok, detay) => {
 
   console.log('\n— Ev içi kontrol listesi —');
   await page.goto(URL, { waitUntil: 'networkidle' });
+  await page.evaluate(() => { window.__printCount = 0; window.print = () => { window.__printCount++; }; });
   await page.click('#git-gizlilik-evici');
   await page.click('#gizlilik-devam');
   t('kontrol listesi açıldı', await page.locator('#bolum-kontrol').isVisible());
@@ -161,6 +162,20 @@ const t = (ad, ok, detay) => {
   const ev = await page.locator('#bolum-ev-sonuc').innerText();
   t('§13 yüzde açıklaması ekranda', ev.includes('güvenlik skoru değildir'));
   t('§13 "Eviniz artık güvenli" yok', !/Eviniz artık güvenli/i.test(ev));
+
+  // rapor yeniden render edilse bile (tamamla-btn) PDF düğmesi tek dinleyiciyle çalışmalı
+  const tamamlaBtn = page.locator('.tamamla-btn').first();
+  if (await tamamlaBtn.count()) {
+    await tamamlaBtn.click();
+    await page.waitForTimeout(80);
+  }
+  const pdfEvBtn = page.locator('#rapor-yazdir-ev');
+  if (await pdfEvBtn.count()) {
+    await pdfEvBtn.click();
+    await page.waitForTimeout(50);
+    const yazdirmaSayisi = await page.evaluate(() => window.__printCount);
+    t('PDF düğmesi yeniden render sonrası tek kez yazdırıyor', yazdirmaSayisi === 1, `print count: ${yazdirmaSayisi}`);
+  }
 
   console.log('\n— Birleşik özet + sıfırlama —');
   if (await page.locator('#ev-sonuc-ozet').isVisible()) {

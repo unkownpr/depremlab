@@ -79,8 +79,7 @@ def main():
     manifest = {
         "name": "Deprem Rehberim",
         "short_name": "Deprem Rehberim",
-        "description": "Depreme hazırlık veri ile değil, eylemle başlar. Binanı anla, evini hazırla, sonraki adımını belirle."
-                       "bilgisiyle deprem risk değerlendirmesi.",
+        "description": "Depreme hazırlık veri ile değil, eylemle başlar. Binanı anla, evini hazırla, sonraki adımını belirle.",
         "start_url": "./index.html",
         "scope": "./",
         "display": "standalone",
