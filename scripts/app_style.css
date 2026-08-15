@@ -558,3 +558,13 @@ dialog.diyalog::backdrop { background: rgba(0,0,0,0.3); }
   .marka { min-height: 2.75rem; }
   .kutu { padding: var(--space-lg); min-height: auto; }
 }
+
+/* Konumdan ilçe bulma bloğu (adres adımı). */
+.konum-bul {
+  margin-bottom: var(--space-xl);
+}
+.konum-bul .yardim {
+  margin-top: var(--space-sm);
+}
+/* Durum satırı yalnızca içerik varken görünsün. */
+.konum-durum:empty { display: none; }

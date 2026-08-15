@@ -207,6 +207,48 @@ function yapisalAdresBolumKur() {
   // Devam butonu
 }
 
+/* Konumdan ilçeyi bul. Koordinat tarayıcıdan çıkmaz: ilçe eşleştirmesi
+ * gömülü D.ilceler poligonlarıyla yerel olarak yapılır, coğrafi kodlama
+ * servisi kullanılmaz. Kullanıcı isterse ilçeyi elle de seçebilir. */
+function adresKonumDurum(metin, tip) {
+  const el = $('#adres-konum-durum');
+  el.textContent = metin;
+  el.dataset.tip = tip || '';
+}
+
+$('#adres-konum').addEventListener('click', ev => {
+  const btn = ev.currentTarget;
+  if (!navigator.geolocation) {
+    adresKonumDurum('Tarayıcınız konum özelliğini desteklemiyor. İlçeyi elle seçebilirsiniz.', 'hata');
+    return;
+  }
+  btn.disabled = true;
+  const eskiMetin = btn.textContent;
+  btn.textContent = 'Konum aranıyor…';
+  adresKonumDurum('Konumunuz aranıyor. Tarayıcı izin isterse "İzin ver" deyin.', '');
+
+  const bitir = () => { btn.disabled = false; btn.textContent = eskiMetin; };
+
+  navigator.geolocation.getCurrentPosition(
+    konum => {
+      bitir();
+      const ilce = ilceBul(D.ilceler, konum.coords.latitude, konum.coords.longitude);
+      if (!ilce) {
+        adresKonumDurum('Konumunuz İstanbul ilçe sınırlarının dışında görünüyor. İlçeyi elle seçebilirsiniz.', 'hata');
+        return;
+      }
+      $('#adres-ilce').value = ilce.ad;
+      $('#adres-hata').hidden = true;
+      adresKonumDurum(`İlçeniz ${ilce.ad} olarak seçildi. Yanlışsa listeden değiştirebilirsiniz.`, 'tamam');
+    },
+    () => {
+      bitir();
+      adresKonumDurum('Konum alınamadı. İlçeyi listeden kendiniz seçebilirsiniz.', 'hata');
+    },
+    { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 }
+  );
+});
+
 function yapisalAdresDogrulaVeDevam() {
   const ilce = kacir($('#adres-ilce').value.trim());
   const mahalle = kacir($('#adres-mahalle').value.trim());

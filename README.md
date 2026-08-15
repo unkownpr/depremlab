@@ -35,6 +35,20 @@ diğerine geçmek engellenmez, özet ekranı tek modülle de çalışır.
 - Adres alanları yalnızca ilçe ölçekli bölgesel bilgiyi göstermek için
   kullanılır ve tarayıcıdan çıkmaz.
 
+### Konumdan ilçe bulma
+
+Adres adımındaki "Konumumu bul" düğmesi isteğe bağlıdır ve yalnızca
+tıklandığında çalışır; sayfa açılışında konum istenmez. Tarayıcıdan alınan
+koordinat, uygulamaya gömülü ilçe poligonlarıyla (`ilceBul`) **yerel olarak**
+ilçeye çevrilir. Coğrafi kodlama servisi, harita servisi veya adres API'si
+çağrılmaz; koordinat hiçbir yere gönderilmez ve saklanmaz. Bulunan ilçe
+listede seçilir, kullanıcı dilerse elle değiştirir.
+
+Tarayıcının kendi konum belirleme mekanizmasının (Wi-Fi/hücre tabanlı konum
+sağlayıcı) işletim sistemi düzeyinde dış bir servise başvurabileceğini not
+edin; bu uygulamanın denetimi dışındadır. Düğmeye hiç dokunmadan ilçeyi elle
+seçerek akış eksiksiz tamamlanabilir.
+
 Tek dış istek Google Fonts'a yapılan yazı tipi isteğidir. Kullanıcı verisi
 taşımaz. Tamamen çevrimdışı çalıştırmak isterseniz `scripts/build_app.py`
 içindeki `ISKELET` sabitinden font `<link>` etiketlerini çıkarın.
