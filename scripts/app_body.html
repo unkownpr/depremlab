@@ -1,0 +1,218 @@
+<header class="masthead">
+  <div class="kapsa ic">
+    <a class="marka" href="#ust">deprem<b>lab</b></a>
+    <nav aria-label="Ana menü">
+      <a href="#basla">Değerlendirme</a>
+      <a href="harita.html">Harita</a>
+      <a href="#veri">Veri</a>
+    </nav>
+  </div>
+</header>
+
+<main id="ust">
+
+  <!-- ============================================ parallax hero -->
+  <section class="hero" aria-labelledby="hero-baslik">
+    <div class="hero-kat kat-arka" data-hiz="0.10" aria-hidden="true">
+      <svg viewBox="0 0 1200 420" preserveAspectRatio="xMidYMid slice"><g id="fay-arka"></g></svg>
+    </div>
+    <div class="hero-kat kat-orta" data-hiz="0.22" aria-hidden="true">
+      <svg viewBox="0 0 1200 420" preserveAspectRatio="xMidYMid slice"><g id="fay-orta"></g></svg>
+    </div>
+    <div class="hero-kat kat-on" data-hiz="0.36" aria-hidden="true">
+      <svg viewBox="0 0 1200 420" preserveAspectRatio="xMidYMid slice"><g id="fay-on"></g></svg>
+    </div>
+
+    <div class="kapsa hero-ic">
+      <h1 id="hero-baslik">Eviniz depreme ne kadar hazır?</h1>
+      <p class="alt">
+        Konumunuzun zeminini, en yakın fayı ve binanızın özelliklerini
+        birlikte değerlendirir. Beş dakika sürer, hiçbir bilgi kaydedilmez.
+      </p>
+      <div class="dugme-sira">
+        <a class="dugme" href="#basla">Değerlendirmeye başla</a>
+        <a class="dugme ikincil" href="harita.html">Haritayı aç</a>
+      </div>
+      <p class="kaynak-satiri">
+        Arka plandaki çizgiler gerçek fay hatlarıdır — Marmara ve çevresi.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============================================ 1.0 seçim -->
+  <section class="asama kapsa" id="basla" aria-labelledby="a1">
+    <span class="asama-no">1.0 · NEREDEN BAŞLAYALIM</span>
+    <h2 id="a1">İki ayrı konu var</h2>
+    <p class="giris">
+      Depremde zarar iki yerden gelir: binanın kendisinden, bir de evin
+      içindeki eşyalardan. İkisi ayrı ayrı değerlendirilir.
+    </p>
+
+    <div class="kutular">
+      <button type="button" class="kutu" id="kutu-yapisal" aria-pressed="false">
+        <span class="kutu-no">A</span>
+        <h3>Binanın kendisi</h3>
+        <p>
+          Zemin, faya uzaklık, yapım yılı ve kat sayısı. Konumunuzu alıp
+          harita verisiyle birleştirir.
+        </p>
+        <span class="devam" aria-hidden="true">Bu değerlendirmeyi yap →</span>
+      </button>
+
+      <button type="button" class="kutu" id="kutu-evici" aria-pressed="false">
+        <span class="kutu-no">B</span>
+        <h3>Evin içi</h3>
+        <p>
+          Devrilecek eşya, cam, kaçış yolu, acil çanta. Yedi soru — konum
+          gerekmez.
+        </p>
+        <span class="devam" aria-hidden="true">Bu değerlendirmeyi yap →</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- ============================================ 2.0 yapısal: konum -->
+  <section class="asama kapsa" id="bolum-konum" hidden aria-labelledby="a2">
+    <span class="asama-no">2.0 · KONUM</span>
+    <h2 id="a2">Binanız nerede?</h2>
+    <p class="giris">
+      Konum yalnızca tarayıcınızda kullanılır, hiçbir yere gönderilmez.
+    </p>
+
+    <div class="dugme-sira">
+      <button type="button" class="dugme" id="btn-konum">
+        Konumumu bul
+      </button>
+      <button type="button" class="dugme ikincil" id="btn-harita-sec">
+        Haritadan seçeyim
+      </button>
+    </div>
+
+    <div class="konum-durum" id="konum-durum" role="status" aria-live="polite">
+      <span class="sim" aria-hidden="true">·</span>
+      <span id="konum-metin">Henüz konum seçilmedi.</span>
+    </div>
+
+    <div id="secim-harita" hidden></div>
+    <p class="yardim" id="harita-yardim" hidden>
+      Haritada binanızın bulunduğu yere dokunun. Yakınlaştırmak için iki
+      parmağınızı kullanın.
+    </p>
+
+    <div class="dugme-sira">
+      <button type="button" class="dugme" id="btn-konum-devam" disabled>
+        Devam et
+      </button>
+      <button type="button" class="dugme ikincil" data-geri="basla">Geri dön</button>
+    </div>
+  </section>
+
+  <!-- ============================================ 3.0 yapısal: bina -->
+  <section class="asama kapsa" id="bolum-bina" hidden aria-labelledby="a3">
+    <span class="asama-no">3.0 · BİNA</span>
+    <h2 id="a3">Binanız hakkında iki soru</h2>
+
+    <fieldset class="alan">
+      <legend>Bina hangi yıllarda yapıldı?</legend>
+      <p class="yardim">
+        Tam yılı bilmiyorsanız yaklaşık olanı seçin. Deprem yönetmeliği
+        1975, 1998, 2007 ve 2018'de değişti — bina hangi kurala göre
+        yapıldıysa o önemli.
+      </p>
+      <div class="secenekler" id="donem-secenekler"></div>
+    </fieldset>
+
+    <div class="alan">
+      <label class="etiket" for="kat">Bina kaç katlı?</label>
+      <p class="yardim">
+        Zemin kat dahil, bodrum hariç. Örnek: zemin + 4 kat ise 5 yazın.
+      </p>
+      <input type="number" id="kat" min="1" max="60" step="1" value="5"
+             inputmode="numeric" aria-describedby="kat-yardim">
+    </div>
+
+    <div class="dugme-sira">
+      <button type="button" class="dugme" id="btn-hesapla">Sonucu göster</button>
+      <button type="button" class="dugme ikincil" data-geri="bolum-konum">Geri dön</button>
+    </div>
+  </section>
+
+  <!-- ============================================ 2.0 ev içi -->
+  <section class="asama kapsa" id="bolum-evici" hidden aria-labelledby="a4">
+    <span class="asama-no">2.0 · EVİN İÇİ</span>
+    <h2 id="a4">Yedi soru</h2>
+    <p class="giris">
+      Her soruyu evinizi düşünerek yanıtlayın. Emin değilseniz "hayır"
+      işaretleyin — sonunda ne yapabileceğinizi yazacağız.
+    </p>
+
+    <div id="evici-sorular"></div>
+
+    <div class="dugme-sira">
+      <button type="button" class="dugme" id="btn-evici-hesapla">Sonucu göster</button>
+      <button type="button" class="dugme ikincil" data-geri="basla">Geri dön</button>
+    </div>
+  </section>
+
+  <!-- ============================================ 4.0 sonuç -->
+  <section class="asama kapsa" id="bolum-sonuc" hidden aria-labelledby="a5">
+    <span class="asama-no">4.0 · SONUÇ</span>
+    <h2 id="a5">Değerlendirme</h2>
+    <div id="sonuc-govde"></div>
+
+    <div class="dugme-sira">
+      <button type="button" class="dugme ikincil" id="btn-bastan">Baştan başla</button>
+      <a class="dugme ikincil" href="harita.html">Haritada incele</a>
+    </div>
+  </section>
+
+  <!-- ============================================ veri -->
+  <section class="asama kapsa" id="veri" aria-labelledby="a6">
+    <span class="asama-no">5.0 · VERİ</span>
+    <h2 id="a6">Bu sonuç neye dayanıyor?</h2>
+    <p class="giris">
+      Dört açık kaynak kullanılıyor. Hepsi indirilebilir, hesap tekrar
+      üretilebilir.
+    </p>
+    <div class="mesafeler">
+      <div class="mesafe">
+        <span><b>Zemin (Vs30)</b><small>USGS Global Vs30 Mosaic — 926 metrelik hücreler</small></span>
+        <span class="km">27.600</span>
+      </div>
+      <div class="mesafe">
+        <span><b>Fay hatları</b><small>Türkiye diri fay verisi — konum ve önem derecesiyle</small></span>
+        <span class="km">926</span>
+      </div>
+      <div class="mesafe">
+        <span><b>Deprem kaydı</b><small>USGS FDSN — 1905'ten bugüne İstanbul çevresi</small></span>
+        <span class="km">2.015</span>
+      </div>
+      <div class="mesafe">
+        <span><b>Tesis ve senaryo</b><small>İBB açık veri + OpenStreetMap</small></span>
+        <span class="km">1.788</span>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="ayak">
+  <div class="kapsa">
+    <p class="beyan">
+      Bu bir tahmindir, rapor değildir. Binanızın gerçek durumunu
+      yalnızca yerinde inceleme söyleyebilir.
+    </p>
+    <p class="kucuk">
+      Hesap; zemin sertliği, faya uzaklık, yapım dönemi ve kat sayısı
+      üzerinden kaba bir gösterge üretir. Binanın taşıyıcı sistemi, malzeme
+      kalitesi, zemin etüdü ve yapılan tadilatlar bu hesapta yoktur — ve
+      bunlar çoğu zaman belirleyici olandır. Sonuç düşük çıksa bile bina
+      riskli, yüksek çıksa bile sağlam olabilir. Karar vermeden önce inşaat
+      mühendisine danışın.
+    </p>
+    <div class="baglar">
+      <a href="harita.html">Harita</a>
+      <a href="KAYNAKLAR.md">Veri kaynakları</a>
+      <a href="ÖZET.md">Bulgu özeti</a>
+    </div>
+  </div>
+</footer>

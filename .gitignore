@@ -1,0 +1,6 @@
+# Ham veri indirmeleri — 61 MB, scripts/build.py ile yeniden üretilebilir.
+data/
+
+.DS_Store
+__pycache__/
+*.pyc
