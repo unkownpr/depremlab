@@ -1,4 +1,4 @@
-/* Bina Güvenliği — akış kontrolü
+/* Deprem Rehberim — akış kontrolü
  * risk_engine.js, nonstructural.js fonksiyonlarını kullanır; D global veri paketidir.
  * State: bellekte, persistence yok. PrivacyNoticeSeen ilk kez gösterilir.
  */
