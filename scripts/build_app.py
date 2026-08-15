@@ -34,19 +34,20 @@ ISKELET = """<!DOCTYPE html>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0&family=Inter:wght@400;600&display=swap">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
 __STIL__
 </style>
 </head>
 <body>
 __GOVDE__
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const D = __VERI__;
 </script>
 <script>
 __MOTOR__
+</script>
+<script>
+__KONTROL__
 </script>
 <script>
 __ANA__
@@ -75,6 +76,7 @@ def main():
     stil = (S / "app_style.css").read_text(encoding="utf-8")
     govde = (S / "app_body.html").read_text(encoding="utf-8")
     motor = motoru_temizle((S / "risk_engine.js").read_text(encoding="utf-8"))
+    kontrol = motoru_temizle((S / "nonstructural.js").read_text(encoding="utf-8"))
     ana = (S / "app_main.js").read_text(encoding="utf-8")
 
     html = (ISKELET
@@ -82,6 +84,7 @@ def main():
             .replace("__GOVDE__", govde)
             .replace("__VERI__", veri)
             .replace("__MOTOR__", motor)
+            .replace("__KONTROL__", kontrol)
             .replace("__ANA__", ana))
 
     hedef = ROOT / "index.html"

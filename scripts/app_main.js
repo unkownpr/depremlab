@@ -1,13 +1,65 @@
-/* depremlab — wizard akışı.
- * risk_engine.js'in fonksiyonlarını kullanır; D global veri paketidir.
+/* depremlab — yeni akış kontrolü.
+ * risk_engine.js, nonstructural.js fonksiyonlarını kullanır; D global veri paketidir.
+ * State: bellekte, persistence yok. PrivacyNoticeSeen ilk kez gösterilir.
  */
 
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
 
-const durum = { yol: null, konum: null, analiz: null };
+// Kaçış fonksiyonu: HTML'e gömülecek kullanıcı girdisini güvenli hale getir
+function kacir(s) {
+  const harita = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+  };
+  return String(s).replace(/[&<>"']/g, c => harita[c]);
+}
 
-/* ------------------------------------------------------ parallax hero */
+// Ana state: bellekte, persistence yok
+const durum = {
+  privacyNoticeSeen: false,
+  hedefModul: null,                 // 'yapisal' | 'evici'
+  yapisal: {
+    adim: 0,                        // 0 adres · 1 bölgesel · 2 sorular · 3 sonuç
+    adres: null,                    // { ilce, mahalle, sokak, bina }
+    bolgesel: null,
+    soruIndex: 0,
+    cevaplar: {},                   // { donem: 'once1999', ... }
+    sonuc: null,
+  },
+  evici: {
+    soruIndex: 0,
+    cevaplar: {},                   // { id: 'evet'|'hayir'|'emin_degilim'|'gecerli_degil' }
+    tamamlananIdler: [],
+    gorevler: [],
+  },
+};
+
+// Oturum sıfırlama
+function resetSession() {
+  durum.privacyNoticeSeen = false;
+  durum.hedefModul = null;
+  durum.yapisal = {
+    adim: 0,
+    adres: null,
+    bolgesel: null,
+    soruIndex: 0,
+    cevaplar: {},
+    sonuc: null,
+  };
+  durum.evici = {
+    soruIndex: 0,
+    cevaplar: {},
+    tamamlananIdler: [],
+    gorevler: [],
+  };
+}
+
+/* ======================================================== parallax hero */
+/* Mevcut parallax IIFE korunur. */
 (function parallaxKur() {
   const P = D.parallax;
   const yaz = (id, liste) => {
@@ -41,9 +93,15 @@ const durum = { yol: null, konum: null, analiz: null };
   dinle();
 })();
 
-/* ------------------------------------------------------------ gezinme */
+/* ======================================================== gezinme */
 function bolumGoster(id) {
-  for (const b of ['bolum-konum', 'bolum-bina', 'bolum-evici', 'bolum-sonuc']) {
+  // 11 bölüm id'sini gizle, hedefi göster
+  const bolumler = [
+    'bolum-giris', 'bolum-gizlilik', 'bolum-adres', 'bolum-bolgesel',
+    'bolum-sorular', 'bolum-gozden-gecir', 'bolum-yapisal-sonuc',
+    'bolum-kontrol', 'bolum-ev-sonuc', 'bolum-ozet', 'bolum-bulunamadi'
+  ];
+  for (const b of bolumler) {
     const el = document.getElementById(b);
     if (el) el.hidden = b !== id;
   }
@@ -52,418 +110,550 @@ function bolumGoster(id) {
   hedef.classList.remove('adim');
   void hedef.offsetWidth;
   hedef.classList.add('adim');
-  hedef.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches
-    ? 'auto' : 'smooth', block: 'start' });
+  hedef.scrollIntoView({
+    behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+    block: 'start'
+  });
   const bas = hedef.querySelector('h2');
   if (bas) { bas.setAttribute('tabindex', '-1'); bas.focus({ preventScroll: true }); }
 }
 
-$('#kutu-yapisal').addEventListener('click', () => {
-  durum.yol = 'yapisal';
-  $('#kutu-yapisal').setAttribute('aria-pressed', 'true');
-  $('#kutu-evici').setAttribute('aria-pressed', 'false');
-  bolumGoster('bolum-konum');
-});
-$('#kutu-evici').addEventListener('click', () => {
-  durum.yol = 'evici';
-  $('#kutu-evici').setAttribute('aria-pressed', 'true');
-  $('#kutu-yapisal').setAttribute('aria-pressed', 'false');
-  eviciKur();
-  bolumGoster('bolum-evici');
-});
-$$('[data-geri]').forEach(b => b.addEventListener('click', () => {
-  const h = b.dataset.geri;
-  if (h === 'basla') {
-    ['bolum-konum', 'bolum-bina', 'bolum-evici', 'bolum-sonuc']
-      .forEach(id => { const e = document.getElementById(id); if (e) e.hidden = true; });
-    $('#basla').scrollIntoView({ behavior: 'smooth', block: 'start' });
-  } else bolumGoster(h);
-}));
-$('#btn-bastan').addEventListener('click', () => {
-  durum.yol = null; durum.konum = null; durum.analiz = null;
-  $('#kutu-yapisal').setAttribute('aria-pressed', 'false');
-  $('#kutu-evici').setAttribute('aria-pressed', 'false');
-  ['bolum-konum', 'bolum-bina', 'bolum-evici', 'bolum-sonuc']
-    .forEach(id => { document.getElementById(id).hidden = true; });
-  $('#basla').scrollIntoView({ behavior: 'smooth', block: 'start' });
+/* Geri/başa dön düğmeleri: data-git="<bölüm id>". Olay delegasyonu, çünkü
+ * bazı bölümler JS tarafından yeniden çizilir. */
+document.addEventListener('click', ev => {
+  const btn = ev.target.closest('[data-git]');
+  if (btn) bolumGoster(btn.dataset.git);
 });
 
-/* -------------------------------------------------------------- konum */
-const IST = { guney: 40.75, kuzey: 41.70, bati: 27.85, dogu: 29.95 };
-const icerideMi = (lat, lon) =>
-  lat >= IST.guney && lat <= IST.kuzey && lon >= IST.bati && lon <= IST.dogu;
-
-function konumDurum(metin, tip) {
-  const kutu = $('#konum-durum');
-  kutu.dataset.tip = tip || '';
-  kutu.querySelector('.sim').textContent =
-    tip === 'tamam' ? '✓' : tip === 'hata' ? '!' : '·';
-  $('#konum-metin').textContent = metin;
-}
-
-function konumAyarla(lat, lon, kaynak) {
-  if (!icerideMi(lat, lon)) {
-    konumDurum('Bu konum İstanbul sınırlarının dışında görünüyor. '
-      + 'Haritadan İstanbul içinde bir nokta seçebilirsiniz.', 'hata');
-    $('#btn-konum-devam').disabled = true;
-    haritaAc();
-    return;
-  }
-  durum.konum = { lat, lon };
-  durum.analiz = konumAnalizi(D, lat, lon);
-  const ilce = durum.analiz.ilce ? durum.analiz.ilce.ad : 'İstanbul';
-  konumDurum(`${ilce} — konum alındı (${kaynak}).`, 'tamam');
-  $('#btn-konum-devam').disabled = false;
-  if (haritaNesnesi) {
-    haritaNesnesi.setView([lat, lon], 14);
-    if (isaret) isaret.setLatLng([lat, lon]);
-    else isaret = L.marker([lat, lon]).addTo(haritaNesnesi);
-  }
-}
-
-$('#btn-konum').addEventListener('click', e => {
-  const b = e.currentTarget;
-  if (!navigator.geolocation) {
-    konumDurum('Tarayıcınız konum desteklemiyor. Haritadan seçin.', 'hata');
-    haritaAc();
-    return;
-  }
-  b.dataset.durum = 'yukleniyor';
-  b.textContent = 'Konum aranıyor…';
-  konumDurum('Konumunuz aranıyor. Tarayıcı izin isterse "İzin ver" deyin.', '');
-  navigator.geolocation.getCurrentPosition(
-    p => {
-      b.dataset.durum = ''; b.textContent = 'Konumumu bul';
-      konumAyarla(p.coords.latitude, p.coords.longitude, 'tarayıcı');
-    },
-    () => {
-      b.dataset.durum = ''; b.textContent = 'Konumumu bul';
-      konumDurum('Konum alınamadı. Haritadan kendiniz seçebilirsiniz.', 'hata');
-      haritaAc();
-    },
-    { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
-  );
-});
-
-let haritaNesnesi = null, isaret = null;
-function haritaAc() {
-  $('#secim-harita').hidden = false;
-  $('#harita-yardim').hidden = false;
-  if (haritaNesnesi) { haritaNesnesi.invalidateSize(); return; }
-  haritaNesnesi = L.map('secim-harita', {
-    center: [41.02, 28.95], zoom: 10, minZoom: 10,
-    maxBounds: L.latLngBounds([[IST.guney, IST.bati], [IST.kuzey, IST.dogu]]),
-    maxBoundsViscosity: 1.0,
-  });
-  L.tileLayer(
-    'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-    { attribution: 'Esri, Maxar', maxZoom: 18 }).addTo(haritaNesnesi);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png',
-    { maxZoom: 18 }).addTo(haritaNesnesi);
-  haritaNesnesi.on('click', ev => konumAyarla(ev.latlng.lat, ev.latlng.lng, 'harita'));
-  setTimeout(() => haritaNesnesi.invalidateSize(), 60);
-}
-$('#btn-harita-sec').addEventListener('click', haritaAc);
-$('#btn-konum-devam').addEventListener('click', () => bolumGoster('bolum-bina'));
-
-/* --------------------------------------------------------------- bina */
-$('#donem-secenekler').innerHTML = YONETMELIK.map((y, i) => `
-  <label class="secenek">
-    <input type="radio" name="donem" value="${y.deger}"${i === 2 ? ' checked' : ''}>
-    <span class="metin"><span>${y.ad}</span><small>${y.not}</small></span>
-  </label>`).join('');
-
-$('#btn-hesapla').addEventListener('click', () => {
-  if (!durum.analiz) { bolumGoster('bolum-konum'); return; }
-  const donem = ($('input[name="donem"]:checked') || {}).value || 'bilmiyorum';
-  const kat = Math.max(1, Math.min(60, parseInt($('#kat').value, 10) || 5));
-  const girdi = { donem, kat };
-  const skor = yapisalSkor(durum.analiz, girdi);
-  sonucYapisal(skor, durum.analiz, girdi);
-  bolumGoster('bolum-sonuc');
-  sonucHaritaKur(durum.analiz);
-  haritaBaglantisi(skor, durum.analiz);
-});
-
-/* ------------------------------------------------------------- ev içi */
-function eviciKur() {
-  if ($('#evici-sorular').dataset.hazir) return;
-  $('#evici-sorular').innerHTML = EV_ICI.map(m => `
-    <fieldset class="alan">
-      <legend>${m.soru}</legend>
-      <div class="secenekler">
-        <label class="secenek">
-          <input type="radio" name="ev-${m.id}" value="evet">
-          <span class="metin"><span>Evet</span></span>
-        </label>
-        <label class="secenek">
-          <input type="radio" name="ev-${m.id}" value="hayir" checked>
-          <span class="metin"><span>Hayır${m.ters ? '' : ' / emin değilim'}</span></span>
-        </label>
-      </div>
-    </fieldset>`).join('');
-  $('#evici-sorular').dataset.hazir = '1';
-}
-
-$('#btn-evici-hesapla').addEventListener('click', () => {
-  const cevaplar = {};
-  for (const m of EV_ICI) {
-    const s = $(`input[name="ev-${m.id}"]:checked`);
-    cevaplar[m.id] = s ? s.value === 'evet' : false;
-  }
-  sonucEvici(yapisalOlmayanSkor(cevaplar));
-  bolumGoster('bolum-sonuc');
-});
-
-/* Sonuç ekranındaki "Haritada incele" bağlantısına konumu ve skoru iliştirir;
- * harita.html bu parametreleri okuyup o noktaya gider. */
-function haritaBaglantisi(skor, a) {
-  const bag = $('#bolum-sonuc a[href^="harita.html"]');
-  if (!bag) return;
-  const p = new URLSearchParams({
-    lat: a.lat.toFixed(5), lon: a.lon.toFixed(5),
-    skor: String(skor.toplam), seviye: skor.seviye.kisa,
-  });
-  if (a.ilce) p.set('ilce', a.ilce.ad);
-  bag.href = 'harita.html?' + p.toString();
-}
-
-/* -------------------------------------------------------------- sonuç */
-function olcekHtml(aktif) {
-  return `<div class="olcek" role="list" aria-label="Risk ölçeği">
-    ${SEVIYELER.map(s => `
-      <div class="olcek-satir" role="listitem"
-           ${s.kisa === aktif ? 'aria-current="true"' : ''}>
-        <span class="sim" aria-hidden="true">${s.simge}</span>
-        <span>${s.ad}</span>
-        <span>${s.kisa === aktif ? 'sizin sonucunuz' : ''}</span>
-      </div>`).join('')}
-  </div>`;
-}
-
-function basHtml(skor, baslik) {
-  const s = skor.seviye;
-  return `<div class="sonuc-bas" data-seviye="${s.kisa}">
-    <span class="rozet"><span aria-hidden="true">${s.simge}</span> ${baslik}</span>
-    <h3>${s.ad}</h3>
-    <p class="ozet">${s.ozet}</p>
-    ${olcekHtml(s.kisa)}
-  </div>`;
-}
-
-/* Sonuç ekranındaki mini harita: konum + en yakın dört tesis.
- * Her çağrıda yeniden kurulur (konum değişmiş olabilir). */
-let sonucHarita = null;
-/* Renkler tokenlardan okunur — Leaflet'e ham değer geçmiyoruz. */
-const jeton = ad => getComputedStyle(document.documentElement)
-  .getPropertyValue(ad).trim();
-const TESIS_RENK = {
-  hastane: jeton('--color-hastane'),
-  itfaiye: jeton('--color-itfaiye'),
-  polis: jeton('--color-polis'),
-  toplanma: jeton('--color-toplanma'),
+/* Her senaryoyu temsil eden yanıt kümesi. Sonuç bunlardan türetilir. */
+const SENARYO_YANITLARI = {
+  priority_review: { donem: 'once1999', kat: 'k5_8', mudahale: 'evet',
+    gorunur: 'catlak', hasar: 'hayir', ilave: 'hayir', onceki: 'hayir' },
+  detailed_review: { donem: 'once1999', kat: 'k5_8', mudahale: 'hayir',
+    gorunur: 'yok', hasar: 'hayir', ilave: 'hayir', onceki: 'evet' },
+  no_prominent_warning: { donem: 'sonra2019', kat: 'k1_4', mudahale: 'hayir',
+    gorunur: 'yok', hasar: 'hayir', ilave: 'hayir', onceki: 'evet' },
+  insufficient_information: { donem: 'bilmiyorum', kat: 'bilmiyorum',
+    mudahale: 'bilmiyorum', gorunur: 'emin_degilim', hasar: 'bilmiyorum',
+    ilave: 'bilmiyorum', onceki: 'bilmiyorum' },
 };
-function sonucHaritaKur(a) {
-  const kutu = document.getElementById('sonuc-harita');
-  if (!kutu) return;
-  if (sonucHarita) { sonucHarita.remove(); sonucHarita = null; }
 
-  sonucHarita = L.map('sonuc-harita', { scrollWheelZoom: false });
-  L.tileLayer(
-    'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-    { attribution: 'Esri, Maxar', maxZoom: 18 }).addTo(sonucHarita);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png',
-    { maxZoom: 18 }).addTo(sonucHarita);
+/* ====== Dev senaryosu: ?scenario=priority|detailed|clear|insufficient */
+function dev_scenarioKontrol() {
+  const params = new URLSearchParams(window.location.search);
+  const scenario = params.get('scenario');
+  if (!scenario) return null;
 
-  const noktalar = [[a.lat, a.lon]];
-
-  L.circleMarker([a.lat, a.lon], {
-    radius: 11, color: jeton('--color-konum'), weight: 3,
-    fillColor: jeton('--color-konum-ic'), fillOpacity: 1,
-  }).addTo(sonucHarita).bindTooltip('Sizin konumunuz', {
-    permanent: true, direction: 'top', className: 'pin-etiket', offset: [0, -10],
-  });
-
-  for (const [tip, etiket] of [['hastane', 'Hastane'], ['itfaiye', 'İtfaiye'],
-                               ['polis', 'Polis'], ['toplanma', 'Toplanma alanı']]) {
-    const t = a[tip];
-    if (!t) continue;
-    const nokta = (D.tesisler[tip === 'toplanma' ? 'toplanma_alani' : tip] || [])
-      .find(x => x[2] === t.ad && Math.abs(mesafeKm(a.lat, a.lon, x[0], x[1]) - t.km) < 0.01);
-    if (!nokta) continue;
-    noktalar.push([nokta[0], nokta[1]]);
-    L.circleMarker([nokta[0], nokta[1]], {
-      radius: 8, color: TESIS_RENK[tip], weight: 3,
-      fillColor: TESIS_RENK[tip], fillOpacity: 0.85,
-    }).addTo(sonucHarita)
-      .bindPopup(`<b>${etiket}</b><br>${t.ad || '—'}<br>${t.km.toFixed(2)} km`);
-    L.polyline([[a.lat, a.lon], [nokta[0], nokta[1]]], {
-      color: TESIS_RENK[tip], weight: 2, opacity: 0.6, dashArray: '5,6',
-    }).addTo(sonucHarita);
-  }
-
-  sonucHarita.fitBounds(L.latLngBounds(noktalar).pad(0.35));
-  setTimeout(() => sonucHarita.invalidateSize(), 60);
+  const secenekler = {
+    'priority': 'priority_review',
+    'detailed': 'detailed_review',
+    'clear': 'no_prominent_warning',
+    'insufficient': 'insufficient_information',
+  };
+  return secenekler[scenario] || null;
 }
 
-function sonucYapisal(skor, a, girdi) {
-  const mesafe = (etiket, t, aciklama) => t ? `
-    <div class="mesafe">
-      <span><b>${etiket}</b><small>${t.ad || aciklama}</small></span>
-      <span class="km">${t.km < 1 ? Math.round(t.km * 1000) + ' m' : t.km.toFixed(1) + ' km'}</span>
-    </div>` : '';
+/* ==================== gizlilik ekranı — ilk kez göster, sonra atla */
+function gizlilikEkrani() {
+  if (durum.privacyNoticeSeen) {
+    // Atla, doğrudan hedef modüle git
+    if (durum.hedefModul === 'yapisal') {
+      yapisalModulBasla();
+    } else if (durum.hedefModul === 'evici') {
+      eviciModulBasla();
+    }
+    return;
+  }
+  bolumGoster('bolum-gizlilik');
+}
 
-  $('#sonuc-govde').innerHTML = `
-    ${basHtml(skor, 'BİNA DEĞERLENDİRMESİ')}
+$('#git-gizlilik-yapisal').addEventListener('click', () => {
+  durum.hedefModul = 'yapisal';
+  gizlilikEkrani();
+});
 
-    <div class="kalemler">
-      ${skor.kalemler.map(k => `
-        <div class="kalem">
-          <div class="ust">
-            <span class="ad">${k.ad}</span>
-            <span class="deger">${k.deger}</span>
-          </div>
-          <div class="cubuk" role="img"
-               aria-label="${k.ad}: ${k.azami} üzerinden ${k.puan} risk puanı">
-            <i style="width:${Math.round(k.puan / k.azami * 100)}%"></i>
-          </div>
-          <p class="not">${k.not}</p>
-        </div>`).join('')}
-    </div>
+$('#git-gizlilik-evici').addEventListener('click', () => {
+  durum.hedefModul = 'evici';
+  gizlilikEkrani();
+});
 
-    <h3 style="margin-top:var(--space-2xl);font-size:var(--text-2xl)">Yakınınızda ne var?</h3>
+$('#gizlilik-devam').addEventListener('click', () => {
+  durum.privacyNoticeSeen = true;
+  if (durum.hedefModul === 'yapisal') {
+    yapisalModulBasla();
+  } else if (durum.hedefModul === 'evici') {
+    eviciModulBasla();
+  } else {
+    bolumGoster('bolum-giris');
+  }
+});
 
-    <div class="mini-harita-kutu">
-      <div id="sonuc-harita" role="img"
-           aria-label="Konumunuz ve en yakın hastane, itfaiye, polis ve toplanma alanını gösteren harita. Aynı bilgiler aşağıda liste olarak da var."></div>
-      <div class="harita-anahtar">
-        <span><i class="k-konum"></i> Sizin konumunuz</span>
-        <span><i class="k-hastane"></i> Hastane</span>
-        <span><i class="k-itfaiye"></i> İtfaiye</span>
-        <span><i class="k-polis"></i> Polis</span>
-        <span><i class="k-toplanma"></i> Toplanma alanı</span>
+/* ==================== yapısal modül başlangıcı */
+function yapisalModulBasla() {
+  durum.hedefModul = 'yapisal';
+  durum.yapisal.adim = 0;
+  yapisalAdresBolumKur();
+  bolumGoster('bolum-adres');
+}
+
+/* ==================== adres bölümü: ilçe, mahalle, sokak, bina no */
+function yapisalAdresBolumKur() {
+  // İlçe dropdown'ını doldur
+  const ilceler = ilceListesi(D);
+  const select = $('#adres-ilce');
+  select.innerHTML = '<option value="">İlçe seçin</option>' +
+    ilceler.map(ilce => `<option value="${kacir(ilce)}">${kacir(ilce)}</option>`).join('');
+
+  // Devam butonu
+}
+
+function yapisalAdresDogrulaVeDevam() {
+  const ilce = kacir($('#adres-ilce').value.trim());
+  const mahalle = kacir($('#adres-mahalle').value.trim());
+  const sokak = kacir($('#adres-sokak').value.trim());
+  const bina = kacir($('#adres-bina').value.trim());
+
+  // İlçe seçili olmalı
+  if (!$('#adres-ilce').value) {
+    $('#adres-hata').textContent = 'Lütfen ilçe seçin.';
+    $('#adres-hata').hidden = false;
+    return;
+  }
+
+  $('#adres-hata').hidden = true;
+
+  // Adresi state'e kaydet
+  durum.yapisal.adres = {
+    ilce: $('#adres-ilce').value,  // Kaçırmamış değer
+    mahalle,
+    sokak,
+    bina,
+  };
+
+  // Bölgesel bilgileri oku
+  durum.yapisal.bolgesel = bolgeselBaglam(D, durum.yapisal.adres.ilce);
+  durum.yapisal.adim = 1;
+
+  yapisalBolgeseBolumKur();
+  bolumGoster('bolum-bolgesel');
+}
+
+/* ==================== bölgesel bilgiler bölümü */
+function yapisalBolgeseBolumKur() {
+  const bg = durum.yapisal.bolgesel;
+  let icerik = '';
+
+  if (!bg) {
+    // Veri bulunamasa bile brief §9.2'nin zorunlu uyarısı ekranda kalmalı.
+    icerik = `
+      <p>Bu ilçe için bölgesel bilgi bulunamadı. Bina sorularına devam edebilirsiniz.</p>
+      <p class="bilgi-notu"><b>${kacir(BOLGESEL_UYARI)}</b></p>
+    `;
+  } else {
+    const nitelik = bg.nitelikselBaglam.map(n =>
+      `<div><b>${kacir(n.baslik)}</b><p>${kacir(n.metin)}</p></div>`
+    ).join('');
+
+    icerik = `
+      <h3>${kacir(bg.konumEtiketi)}</h3>
+      ${nitelik}
+      <p><em>Veri durumu:</em> ${bg.veriDurumu === 'mevcut' ? 'Mevcut' : 'Yok'}</p>
+      <p><em>Tarih:</em> ${kacir(bg.veriTarihi)}</p>
+      <p><em>Kaynak:</em> ${kacir(bg.kaynak)}</p>
+      <p class="bilgi-notu"><b>${kacir(BOLGESEL_UYARI)}</b></p>
+      <p style="color: var(--color-ink-3); font-size: var(--text-sm)">
+        ${kacir(BOLGESEL_KAPSAM)}
+      </p>
+    `;
+  }
+
+  $('#bolgesel-govde').innerHTML = icerik;
+}
+
+/* ==================== yapısal sorular bölümü */
+function yapisalSorularBolumKur() {
+  durum.yapisal.adim = 2;
+  durum.yapisal.soruIndex = 0;
+  yapisalSoruGoster();
+}
+
+function yapisalSoruGoster() {
+  if (durum.yapisal.soruIndex >= YAPISAL_SORULAR.length) {
+    // Tüm sorular soruldu, gözden geçir ekranına git
+    durum.yapisal.adim = 3;
+    yapisalGozdenGecirBolumKur();
+    bolumGoster('bolum-gozden-gecir');
+    return;
+  }
+
+  const soru = YAPISAL_SORULAR[durum.yapisal.soruIndex];
+  const cevaplanmis = durum.yapisal.cevaplar[soru.id];
+
+  const secenekler = soru.secenekler.map(s => `
+    <label class="secenek">
+      <input type="radio" name="yapisal-soru" value="${kacir(s.deger)}"${cevaplanmis === s.deger ? ' checked' : ''}>
+      <span class="metin"><span>${kacir(s.etiket)}</span></span>
+    </label>
+  `).join('');
+
+  const yardim = soru.yardim ? `<p style="margin-top: var(--space-sm); color: var(--color-ink-3);">${kacir(soru.yardim)}</p>` : '';
+
+  $('#soru-govde').innerHTML = `
+    <fieldset>
+      <legend>${kacir(soru.soru)}</legend>
+      ${yardim}
+      <div class="secenekler">
+        ${secenekler}
       </div>
-    </div>
+    </fieldset>
+  `;
 
-    <div class="mesafeler">
-      ${mesafe('En yakın hastane', a.hastane)}
-      ${mesafe('En yakın itfaiye', a.itfaiye)}
-      ${mesafe('En yakın polis', a.polis)}
-      ${mesafe('En yakın toplanma alanı', a.toplanma, 'OpenStreetMap kaydı')}
+  $('#soru-ilerleme').textContent = `${durum.yapisal.soruIndex + 1} / ${YAPISAL_SORULAR.length} soru`;
+
+  // Soru navigasyonu
+  $('#soru-geri').disabled = durum.yapisal.soruIndex === 0;
+  $('#soru-ileri').disabled = !cevaplanmis;
+
+  bolumGoster('bolum-sorular');
+}
+
+/* Bir seçenek işaretlenince yanıtı hemen kaydet ve İleri'yi aç.
+ * Olay delegasyonu: #soru-govde her soruda yeniden çizilir. */
+$('#soru-govde').addEventListener('change', ev => {
+  const girdi = ev.target.closest('input[name="yapisal-soru"]');
+  if (!girdi) return;
+  const soru = YAPISAL_SORULAR[durum.yapisal.soruIndex];
+  if (soru) durum.yapisal.cevaplar[soru.id] = girdi.value;
+  $('#soru-ileri').disabled = false;
+});
+
+$('#soru-geri').addEventListener('click', () => {
+  if (durum.yapisal.soruIndex > 0) {
+    durum.yapisal.soruIndex--;
+    yapisalSoruGoster();
+  }
+});
+
+$('#soru-ileri').addEventListener('click', () => {
+  const secilen = $('input[name="yapisal-soru"]:checked');
+  if (!secilen) return;
+
+  const soru = YAPISAL_SORULAR[durum.yapisal.soruIndex];
+  durum.yapisal.cevaplar[soru.id] = secilen.value;
+
+  if (durum.yapisal.soruIndex < YAPISAL_SORULAR.length - 1) {
+    durum.yapisal.soruIndex++;
+    yapisalSoruGoster();
+  } else {
+    durum.yapisal.adim = 3;
+    yapisalGozdenGecirBolumKur();
+    bolumGoster('bolum-gozden-gecir');
+  }
+});
+
+/* ==================== gözden geçir bölümü */
+function yapisalGozdenGecirBolumKur() {
+  const adres = durum.yapisal.adres;
+  const cevaplar = durum.yapisal.cevaplar;
+
+  const adresBilgisi = `
+    <div>
+      <b>İlçe:</b> ${kacir(adres.ilce)}<br>
+      ${adres.mahalle ? `<b>Mahalle:</b> ${kacir(adres.mahalle)}<br>` : ''}
+      ${adres.sokak ? `<b>Sokak:</b> ${kacir(adres.sokak)}<br>` : ''}
+      ${adres.bina ? `<b>Bina No:</b> ${kacir(adres.bina)}<br>` : ''}
     </div>
-    <p class="not" style="margin-top:var(--space-sm);color:var(--color-ink-3);font-size:var(--text-sm)">
-      Mesafeler kuş uçuşudur, yol mesafesi değildir. Toplanma alanı listesi
-      eksiktir — resmi liste açık veride yayımlanmıyor.
+  `;
+
+  const cevaplanmis = YAPISAL_SORULAR.map(s => {
+    const c = cevaplar[s.id];
+    if (!c) return null;
+    const sec = s.secenekler.find(x => x.deger === c);
+    return `<div><b>${kacir(s.soru)}</b><br>${sec ? kacir(sec.etiket) : c}</div>`;
+  }).filter(Boolean).join('');
+
+  $('#gozden-gecir-govde').innerHTML = `
+    <h3>Adres</h3>
+    ${adresBilgisi}
+    <h3>Cevaplar</h3>
+    ${cevaplanmis}
+  `;
+
+}
+
+/* ==================== yapısal sonuç */
+function yapisalSonucKur() {
+  // Dev scenario kontrolü
+  const scenario = dev_scenarioKontrol();
+  if (scenario) {
+    /* Senaryoyu temsil eden yanıt kümesinden gerçek sonucu türet — böylece
+     * başlık, özet, etkenler ve öneriler üretimdekiyle birebir aynı olur. */
+    durum.yapisal.sonuc = deriveDemoStructuralPriority(SENARYO_YANITLARI[scenario]);
+    // Senaryo modu etiketi göster
+    const etiketi = document.createElement('div');
+    etiketi.id = 'senaryo-etiketi';
+    etiketi.textContent = '🔧 Senaryo Modu';
+    etiketi.style.cssText = 'position: fixed; top: 1rem; right: 1rem; background: #f59e0b; color: white; padding: 0.5rem 1rem; border-radius: 4px; z-index: 9999; font-size: var(--text-sm); font-weight: bold;';
+    document.body.appendChild(etiketi);
+  } else {
+    // Gerçek sonuç türet
+    durum.yapisal.sonuc = deriveDemoStructuralPriority(durum.yapisal.cevaplar);
+  }
+
+  yapisalSonucGoster();
+  bolumGoster('bolum-yapisal-sonuc');
+}
+
+function yapisalSonucGoster() {
+  const sonuc = durum.yapisal.sonuc;
+  const adres = durum.yapisal.adres;
+
+  // Basit özet
+  const factors = sonuc.factors.map(f => `
+    <div>
+      <b>${kacir(f.etiket)}</b> (${kacir(f.tur)})<br>
+      ${kacir(f.metin)}
+    </div>
+  `).join('');
+
+  const missingInfo = sonuc.missingInformation.map(m => `<li>${kacir(m)}</li>`).join('');
+  const recommendations = sonuc.recommendations.map(r => `<li>${kacir(r)}</li>`).join('');
+
+  $('#yapisal-sonuc-govde').innerHTML = `
+    <h3>${kacir(sonuc.title)}</h3>
+    <p>${kacir(sonuc.summary)}</p>
+
+    ${factors ? `<h4>Binanız hakkında bildiklerimiz</h4><div>${factors}</div>` : ''}
+    ${missingInfo ? `<h4>Bilmediğimiz veya doğrulayamadığımız bilgiler</h4><ul>${missingInfo}</ul>` : ''}
+    ${recommendations ? `<h4>Öneriler</h4><ul>${recommendations}</ul>` : ''}
+
+    <p style="margin-top: var(--space-lg); font-size: var(--text-sm); color: var(--color-ink-3);">
+      ${kacir(YAPISAL_SINIR_METNI)}
     </p>
 
-    ${a.ilce ? `
-      <h3 style="margin-top:var(--space-2xl);font-size:var(--text-2xl)">${a.ilce.ad} geneli</h3>
-      <div class="mesafeler">
-        <div class="mesafe"><span><b>Senaryo can kaybı</b><small>İBB mahalle senaryosu toplamı</small></span>
-          <span class="km">${(a.ilce.can || 0).toLocaleString('tr')}</span></div>
-        <div class="mesafe"><span><b>Geçici barınma ihtiyacı</b><small>senaryo sonrası</small></span>
-          <span class="km">${(a.ilce.barinma || 0).toLocaleString('tr')}</span></div>
-        <div class="mesafe"><span><b>Kişi başına açık alan</b><small>İBB yeşil alan envanteri — alt sınır</small></span>
-          <span class="km">${a.ilce.m2kisi || '—'} m²</span></div>
-      </div>` : ''}
+    <p style="margin-top: var(--space-sm); font-size: var(--text-sm); color: var(--color-ink-3);">
+      Bu sonuç kesin bir hasar veya güvenlik tespiti değildir. Yetkili uzmanlar tarafından yapılacak teknik incelemelerle değerlendirilebilir.
+    </p>
 
-    ${planHtml(eylemPlani(skor, a, girdi))}
-
-    <div class="yapilacaklar">
-      <div class="yapilacak">
-        <b>Evin içini de değerlendirin</b>
-        Binanız sağlam olsa bile yaralanmaların büyük kısmı devrilen eşyadan
-        olur. Yedi soruluk ev içi değerlendirmesi beş dakika sürer.
-      </div>
-    </div>`;
-}
-
-/* Eylem planını dört zaman kutusu hâlinde yazar. */
-function planHtml(plan) {
-  const kutu = (baslik, alt, maddeler) => !maddeler.length ? '' : `
-    <div class="zaman">
-      <div class="zaman-bas">
-        <h4>${baslik}</h4>
-        <span class="adet">${maddeler.length} madde · ${alt}</span>
-      </div>
-      <ol>
-        ${maddeler.map((m, i) => `
-          <li${m.vurgu ? ' data-vurgu="1"' : ''}>
-            <span class="sira" aria-hidden="true">${String(i + 1).padStart(2, '0')}</span>
-            <span><b>${m.baslik}</b><span>${m.metin}</span></span>
-          </li>`).join('')}
-      </ol>
-    </div>`;
-
-  return `
-    <div class="plan-ozet">
-      <span class="etiket">ŞİMDİ NE YAPACAKSINIZ</span>
-      <p>${plan.tekCumle}</p>
+    <h4>Binanız için hangi değerlendirmeler yapılabilir?</h4>
+    <div class="secenek-kartlar">
+      ${DEGERLENDIRME_SECENEKLERI.map(d => `
+        <div class="secenek-kart">
+          <b>${kacir(d.baslik)}</b>
+          <p><em>Ne için yardımcı olabilir:</em> ${kacir(d.neYapar)}</p>
+          <p><em>Ne belirleyemez:</em> ${kacir(d.neYapmaz)}</p>
+          ${d.not ? `<p style="color: var(--color-ink-3); font-size: var(--text-sm)">${kacir(d.not)}</p>` : ''}
+        </div>`).join('')}
     </div>
-    ${kutu('Bugün', 'para gerekmez', plan.bugun)}
-    ${kutu('Bu hafta', 'küçük harcama', plan.hafta)}
-    ${kutu('Bu ay', 'binanın kendisi', plan.ay)}
-    ${kutu('Bu yıl', 'kalıcı hazırlık', plan.yil)}`;
+    <p style="font-size: var(--text-sm); color: var(--color-ink-3);">
+      ${kacir(DEGERLENDIRME_SECENEK_NOTU)}
+    </p>
+  `;
+
 }
 
-function sonucEvici(skor) {
-  const yapilan = skor.madde.length - skor.eksikler.length;
-  $('#sonuc-govde').innerHTML = `
-    ${basHtml(skor, 'EV İÇİ DEĞERLENDİRMESİ')}
+/* ==================== ev içi kontrol listesi modülü */
+function eviciModulBasla() {
+  durum.hedefModul = 'evici';
+  durum.evici.soruIndex = 0;
+  eviciSoruGoster();
+}
 
-    <div class="mesafeler" style="margin-top:var(--space-xl)">
-      <div class="mesafe">
-        <span><b>Alınmış önlem</b><small>yedi maddeden</small></span>
-        <span class="km">${yapilan} / 7</span>
+function eviciSoruGoster() {
+  if (durum.evici.soruIndex >= EV_ICI_KONTROL.length) {
+    // Tüm sorular soruldu
+    eviciGorevlerKur();
+    bolumGoster('bolum-kontrol');
+    eviciSonucKur();
+    return;
+  }
+
+  const madde = EV_ICI_KONTROL[durum.evici.soruIndex];
+  const cevaplanmis = durum.evici.cevaplar[madde.id];
+
+  const secenekler = [
+    { deger: 'evet', etiket: 'Evet' },
+    { deger: 'hayir', etiket: 'Hayır' },
+    { deger: 'emin_degilim', etiket: 'Emin değilim' },
+    { deger: 'gecerli_degil', etiket: 'Bu ev için geçerli değil' },
+  ];
+
+  const html = secenekler.map(s => `
+    <label class="secenek">
+      <input type="radio" name="evici-soru" value="${s.deger}"${cevaplanmis === s.deger ? ' checked' : ''}>
+      <span class="metin"><span>${s.etiket}</span></span>
+    </label>
+  `).join('');
+
+  $('#kontrol-govde').innerHTML = `
+    <fieldset>
+      <legend>${kacir(madde.question)}</legend>
+      <p style="margin-top: var(--space-sm); font-size: var(--text-sm); color: var(--color-ink-3);">
+        <b>Risk nedeni:</b> ${kacir(madde.riskReason)}
+      </p>
+      <div class="secenekler">
+        ${html}
       </div>
+    </fieldset>
+  `;
+
+  $('#kontrol-ilerleme').textContent = `${yanitlananSayisi(durum.evici.cevaplar)} / ${EV_ICI_KONTROL.length} soru yanıtlandı`;
+
+  $('#kontrol-geri').disabled = durum.evici.soruIndex === 0;
+  $('#kontrol-ileri').disabled = !cevaplanmis;
+
+  bolumGoster('bolum-kontrol');
+}
+
+/* Seçenek işaretlenince yanıtı kaydet, ilerlemeyi ve İleri'yi güncelle. */
+$('#kontrol-govde').addEventListener('change', ev => {
+  const girdi = ev.target.closest('input[name="evici-soru"]');
+  if (!girdi) return;
+  const madde = EV_ICI_KONTROL[durum.evici.soruIndex];
+  if (madde) durum.evici.cevaplar[madde.id] = girdi.value;
+  $('#kontrol-ileri').disabled = false;
+  $('#kontrol-ilerleme').textContent =
+    `${yanitlananSayisi(durum.evici.cevaplar)} / ${EV_ICI_KONTROL.length} soru yanıtlandı`;
+});
+
+$('#kontrol-geri').addEventListener('click', () => {
+  if (durum.evici.soruIndex > 0) {
+    durum.evici.soruIndex--;
+    eviciSoruGoster();
+  }
+});
+
+$('#kontrol-ileri').addEventListener('click', () => {
+  const secilen = $('input[name="evici-soru"]:checked');
+  if (!secilen) return;
+
+  const madde = EV_ICI_KONTROL[durum.evici.soruIndex];
+  durum.evici.cevaplar[madde.id] = secilen.value;
+
+  if (durum.evici.soruIndex < EV_ICI_KONTROL.length - 1) {
+    durum.evici.soruIndex++;
+    eviciSoruGoster();
+  } else {
+    eviciGorevlerKur();
+    eviciSonucKur();
+    bolumGoster('bolum-ev-sonuc');
+  }
+});
+
+function eviciGorevlerKur() {
+  durum.evici.gorevler = gorevUret(durum.evici.cevaplar);
+}
+
+function eviciSonucKur() {
+  const yuzde = tamamlanmaYuzdesi(durum.evici.cevaplar, durum.evici.tamamlananIdler);
+  const yanitlanmis = yanitlananSayisi(durum.evici.cevaplar);
+  const uygulanabilir = uygulanabilirSayisi(durum.evici.cevaplar);
+  const tamamlanan = tamamlananOnlemSayisi(durum.evici.cevaplar, durum.evici.tamamlananIdler);
+
+  const gorevler = durum.evici.gorevler;
+  const ilkUc = ilkUcGorev(gorevler, durum.evici.tamamlananIdler);
+
+  const gorevHtml = ilkUc.map(g => `
+    <div class="gorev-kart">
+      <h4>${kacir(g.baslik)}</h4>
+      <p>${kacir(g.aciklama)}</p>
+      <div>
+        <span class="oncelik-rozet" data-oncelik="${g.priority}">
+          ${g.priority === 'critical' ? 'Acil' : g.priority === 'high' ? 'Yüksek' : 'Orta'}
+        </span>
+        ${g.professionalSupport ? '<span style="font-size: var(--text-sm); color: var(--color-ink-3);">👤 Uzman desteği önerilir</span>' : ''}
+      </div>
+      <button class="tamamla-btn" data-gorev-id="${kacir(g.id)}">
+        Tamamlandı olarak işaretle
+      </button>
     </div>
+  `).join('');
 
-    ${skor.eksikler.length ? (() => {
-      // ağırlığı yüksek olan önce: en çok fayda getiren madde başa gelsin
-      const sirali = [...skor.eksikler].sort((x, y) => y.agirlik - x.agirlik);
-      const bugun = sirali.filter(m => ['vana', 'bulusma', 'kacis', 'yatak'].includes(m.id));
-      const hafta = sirali.filter(m => ['dolap', 'canta', 'cam'].includes(m.id));
-      const kutu = (baslik, alt, liste) => !liste.length ? '' : `
-        <div class="zaman">
-          <div class="zaman-bas">
-            <h4>${baslik}</h4>
-            <span class="adet">${liste.length} madde · ${alt}</span>
-          </div>
-          <ol>
-            ${liste.map((m, i) => `
-              <li${i === 0 && baslik === 'Bugün' ? ' data-vurgu="1"' : ''}>
-                <span class="sira" aria-hidden="true">${String(i + 1).padStart(2, '0')}</span>
-                <span><b>${m.soru.replace(/\?$/, '')}</b><span>${m.yapilacak}</span></span>
-              </li>`).join('')}
-          </ol>
-        </div>`;
-      return `
-        <div class="plan-ozet">
-          <span class="etiket">ŞİMDİ NE YAPACAKSINIZ</span>
-          <p>${sirali[0].id === 'dolap'
-            ? 'Devrilecek mobilyaları sabitlemek, bu listede en çok işe yarayan tek adım.'
-            : 'Eksiklerin çoğu bugün, para harcamadan kapanabilir.'}</p>
-        </div>
-        ${kutu('Bugün', 'para gerekmez', bugun)}
-        ${kutu('Bu hafta', 'küçük harcama', hafta)}`;
-    })()
-    : `<div class="plan-ozet">
-        <span class="etiket">ŞİMDİ NE YAPACAKSINIZ</span>
-        <p>Ev içi hazırlığınız tamam. Sıradaki adım binanın kendisi.</p>
-      </div>
-      <div class="yapilacaklar">
-        <div class="yapilacak">
-          <b>Yılda bir gözden geçirin</b>
-          Acil çantadaki ilaç ve pil tarihleri, sabitlemelerin gevşeyip
-          gevşemediği, buluşma noktasının hâlâ uygun olup olmadığı.
-        </div>
-      </div>`}
+  $('#ev-sonuc-govde').innerHTML = `
+    <h3>Hazırlık ilerlemeniz</h3>
+    <p>${kacir(yanitlanmis)} / ${EV_ICI_KONTROL.length} soru yanıtlandı</p>
+    <p><strong>${tamamlanan} / ${uygulanabilir} önlem tamamlandı (%${yuzde})</strong></p>
+    <p style="font-size: var(--text-sm); color: var(--color-ink-3);">
+      ${kacir(YUZDE_ACIKLAMASI)}
+    </p>
 
-    <div class="yapilacaklar">
-      <div class="yapilacak">
-        <b>Binanın kendisini de değerlendirin</b>
-        Ev içi hazırlık, binanın dayanıklılığının yerine geçmez. Konumunuzu
-        ve bina bilgilerinizi girerek ikinci değerlendirmeyi de yapabilirsiniz.
-      </div>
-    </div>`;
+    <h4>Yapabileceğiniz ilk adımlar</h4>
+    ${gorevHtml || '<p>Tüm ön lemleri tamamladınız.</p>'}
+  `;
+
+  // Tamamla butonlarını bağla
+  $$('.tamamla-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const gorevId = btn.dataset.gorevId;
+      if (!durum.evici.tamamlananIdler.includes(gorevId)) {
+        durum.evici.tamamlananIdler.push(gorevId);
+      }
+      eviciSonucKur();
+      $('#duyuru').textContent = 'Adım tamamlandı. Hazırlık listeniz güncellendi.';
+    });
+  });
 }
+
+/* ==================== birleşik özet */
+function ozet() {
+  const yapisalDurum = durum.yapisal.sonuc ? 'tamam' : 'eksik';
+  const yapisalMetin = durum.yapisal.sonuc ? kacir(durum.yapisal.sonuc.title) : 'Yapısal değerlendirme tamamlanmadı.';
+
+  const evDurum = durum.evici.cevaplar && Object.keys(durum.evici.cevaplar).length > 0 ? 'tamam' : 'eksik';
+  const tamamlanan = tamamlananOnlemSayisi(durum.evici.cevaplar, durum.evici.tamamlananIdler);
+  const evMetin = `${tamamlanan} / ${EV_ICI_KONTROL.length} önlem tamamlandı`;
+
+  $('#ozet-govde').innerHTML = `
+    <h3>Binanız</h3>
+    <p>${yapisalMetin}</p>
+    <button id="ozet-yapisala-don">Bina değerlendirmesine dön</button>
+
+    <h3>Eviniz</h3>
+    <p>${evMetin}</p>
+    <button id="ozet-evicine-don">Yapılacaklar listeme dön</button>
+
+    <p style="margin-top: var(--space-lg); font-style: italic;">
+      ${kacir(OZET_DESTEK)}
+    </p>
+  `;
+
+
+  bolumGoster('bolum-ozet');
+}
+
+/* Adım düğmeleri: tek seferlik bağlanır. Bu düğmeler bölüm kurulum
+ * fonksiyonlarının içinde bağlanırsa modüle her yeniden girişte listener
+ * üst üste binerdi. */
+$('#adres-devam').addEventListener('click', () => yapisalAdresDogrulaVeDevam());
+$('#bolgesel-devam').addEventListener('click', () => yapisalSorularBolumKur());
+$('#gozden-gecir-onayla').addEventListener('click', () => yapisalSonucKur());
+$('#yapisal-sonuc-devam').addEventListener('click', () => eviciModulBasla());
+$('#ozet-yapisala-don').addEventListener('click', () => yapisalModulBasla());
+$('#ozet-evicine-don').addEventListener('click', () => eviciModulBasla());
+$('#ev-sonuc-ozet').addEventListener('click', ozet);
+
+/* ==================== sıfırlama */
+$('#sifirla').addEventListener('click', () => {
+  $('#sifirla-diyalog').showModal();
+});
+
+$('#sifirla-onayla').addEventListener('click', () => {
+  $('#sifirla-diyalog').close();
+  resetSession();
+  // Scenario modu etiketini kaldır
+  const etiketi = document.getElementById('senaryo-etiketi');
+  if (etiketi) etiketi.remove();
+  bolumGoster('bolum-giris');
+  $('#duyuru').textContent = 'Değerlendirme sıfırlandı.';
+});
+
+$('#sifirla-vazgec').addEventListener('click', () => {
+  $('#sifirla-diyalog').close();
+});
+
+/* ==================== başlangıç */
+document.addEventListener('DOMContentLoaded', () => {
+  // ?scenario=... verildiyse doğrudan ilgili yapısal sonuç durumunu aç.
+  if (dev_scenarioKontrol()) { yapisalSonucKur(); return; }
+  bolumGoster('bolum-giris');
+});

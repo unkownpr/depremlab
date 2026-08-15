@@ -1,26 +1,9 @@
-/* depremlab — risk motoru.
+/* depremlab — motor arayüzü (v2).
  *
- * Saf fonksiyonlar: veri + kullanıcı girdisi -> skor.
- * build_app.py bu dosyayı index.html'e gömer.
- *
- * Skor 0-100, YÜKSEK = KÖTÜ.
- *   0-25  güvenli · 26-50 az güvenli · 51-75 yüksek risk · 76-100 kritik
+ * Yeniden yazılan yapı: niteliksel sonuçlar, prototip UI yönlendirmesi,
+ * bölgesel bağlam (yapısal sonuç etkilemez), 7 yapısal soru.
+ * Sayısal puan, skor normalizasyonu, skora dayalı eylem planı kaldırıldı.
  */
-
-const SEVIYELER = [
-  { esik: 25,  ad: 'GÜVENLİ',      kisa: 'guvenli',  simge: '✓',
-    ozet: 'Bilinen risk etkenleri düşük görünüyor.' },
-  { esik: 50,  ad: 'AZ GÜVENLİ',   kisa: 'az',       simge: '!',
-    ozet: 'Birkaç etken dikkat istiyor.' },
-  { esik: 75,  ad: 'YÜKSEK RİSK',  kisa: 'yuksek',   simge: '!!',
-    ozet: 'Birden fazla etken üst üste biniyor.' },
-  { esik: 101, ad: 'KRİTİK',       kisa: 'kritik',   simge: '!!!',
-    ozet: 'Bir uzmana danışmanız önerilir.' },
-];
-
-function seviyeBul(skor) {
-  return SEVIYELER.find(s => skor < s.esik) || SEVIYELER[SEVIYELER.length - 1];
-}
 
 function kis(x, alt, ust) { return Math.max(alt, Math.min(ust, x)); }
 
@@ -126,307 +109,318 @@ function konumAnalizi(D, lat, lon) {
   };
 }
 
-/* ------------------------------------------------------------- yapısal */
+/* ----------------------------------------------------------- yapısal soru */
 
-/* Deprem yönetmeliği dönemleri. Bina bu dönemlerin hangisinde yapıldıysa
- * o dönemin kuralına göre tasarlanmış sayılır. */
-const YONETMELIK = [
-  { deger: 'once1975', ad: '1975 öncesi',   puan: 30,
-    not: 'Modern deprem yönetmeliği öncesi. En yüksek belirsizlik.' },
-  { deger: '1975_1998', ad: '1975 – 1998',  puan: 24,
-    not: '1975 yönetmeliği dönemi. 1999 depremi sonrası kurallar çok değişti.' },
-  { deger: '1999_2007', ad: '1999 – 2007',  puan: 15,
-    not: '1998 yönetmeliği dönemi. Denetim uygulaması yeni yerleşiyordu.' },
-  { deger: '2008_2018', ad: '2008 – 2018',  puan: 8,
-    not: '2007 yönetmeliği ve yapı denetimi dönemi.' },
-  { deger: 'sonra2018', ad: '2018 sonrası', puan: 3,
-    not: '2018 Türkiye Bina Deprem Yönetmeliği dönemi.' },
-  { deger: 'bilmiyorum', ad: 'Bilmiyorum',  puan: 20,
-    not: 'Bina yaşı bilinmediği için orta-üst değer alındı.' },
-];
-
-/** Zemin puanı: Vs30 düştükçe sarsıntı büyür. 760 m/s kaya referansı. */
-function zeminPuani(vs30) {
-  if (vs30 == null) return { puan: 15, not: 'Zemin verisi bu noktada yok, orta değer alındı.' };
-  const t = kis((760 - vs30) / (760 - 180), 0, 1);
-  const puan = Math.round(t * 30);
-  let not;
-  if (vs30 < 250)      not = 'Çok yumuşak zemin. Sarsıntı belirgin şekilde büyür.';
-  else if (vs30 < 400) not = 'Yumuşak zemin. Sarsıntı büyür.';
-  else if (vs30 < 600) not = 'Orta sertlikte zemin.';
-  else                 not = 'Sert zemin. Sarsıntı büyütmesi sınırlı.';
-  return { puan, not };
-}
-
-/** Fay puanı: yakınlık yer hareketini artırır. */
-function fayPuani(km) {
-  const t = kis((45 - km) / 45, 0, 1);
-  const puan = Math.round(t * 20);
-  let not;
-  if (km < 10)      not = 'Faya çok yakın. Yer hareketi en şiddetli bu bantta olur.';
-  else if (km < 20) not = 'Faya yakın.';
-  else if (km < 40) not = 'Orta mesafe.';
-  else              not = 'Bilinen faylardan görece uzak.';
-  return { puan, not };
-}
-
-/* Kat sayısı + zemin etkileşimi (rezonans).
- *
- * Zeminin hakim titreşim periyodu kabaca Ts ≈ 4H / Vs30 (H ≈ 30 m).
- * Binanın periyodu kabaca Tb ≈ 0.1 × kat sayısı.
- * İkisi birbirine yaklaşırsa bina zeminle aynı ritimde sallanır — zorlanma artar.
- */
-function katPuani(kat, vs30) {
-  const taban = kis((kat - 2) / 10, 0, 1) * 10;  // yükseklik tek başına: 0-10
-  if (vs30 == null) {
-    return { puan: Math.round(taban + 5), rezonans: null,
-             not: 'Zemin verisi olmadığı için zemin-bina uyumu hesaplanamadı.' };
-  }
-  const Ts = 120 / vs30;            // zemin periyodu, saniye
-  const Tb = 0.1 * kat;             // bina periyodu, saniye
-  const fark = Math.abs(Ts - Tb) / Ts;
-  const yakinlik = kis(1 - fark, 0, 1);
-  const rez = Math.round(yakinlik * 10);         // zemin-bina uyumu: 0-10
-  let not;
-  if (yakinlik > 0.7)      not = 'Bina yüksekliği bu zeminin titreşim ritmine yakın — zorlanma artabilir.';
-  else if (yakinlik > 0.4) not = 'Bina yüksekliği ile zemin ritmi kısmen örtüşüyor.';
-  else                     not = 'Bina yüksekliği zeminin ritminden uzak.';
-  return {
-    puan: Math.round(taban + rez),
-    rezonans: { Ts: +Ts.toFixed(2), Tb: +Tb.toFixed(2), yakinlik: +yakinlik.toFixed(2) },
-    not,
-  };
-}
-
-function yapisalSkor(analiz, girdi) {
-  const z = zeminPuani(analiz.vs30);
-  const f = fayPuani(analiz.fay.km);
-  const y = YONETMELIK.find(v => v.deger === girdi.donem) || YONETMELIK[5];
-  const k = katPuani(girdi.kat, analiz.vs30);
-
-  const toplam = kis(z.puan + f.puan + y.puan + k.puan, 0, 100);
-  return {
-    toplam: Math.round(toplam),
-    seviye: seviyeBul(toplam),
-    kalemler: [
-      { ad: 'Zemin',            puan: z.puan, azami: 30, not: z.not,
-        deger: analiz.vs30 == null ? 'veri yok' : `${Math.round(analiz.vs30)} m/s` },
-      { ad: 'Faya uzaklık',     puan: f.puan, azami: 20, not: f.not,
-        deger: `${analiz.fay.km.toFixed(1)} km — ${analiz.fay.ad}` },
-      { ad: 'Yapım dönemi',     puan: y.puan, azami: 30, not: y.not,
-        deger: y.ad },
-      { ad: 'Kat sayısı',       puan: k.puan, azami: 20, not: k.not,
-        deger: `${girdi.kat} kat` },
+const YAPISAL_SORULAR = [
+  {
+    id: 'donem',
+    sira: 1,
+    soru: 'Binanız hangi dönemde inşa edildi?',
+    secenekler: [
+      { deger: 'once1999', etiket: '1999\'dan önce' },
+      { deger: 'a1999_2007', etiket: '1999–2007 arası' },
+      { deger: 'a2007_2019', etiket: '2007–2019 arası' },
+      { deger: 'sonra2019', etiket: '2019 ve sonrası' },
+      { deger: 'bilmiyorum', etiket: 'Bilmiyorum' },
     ],
-    rezonans: k.rezonans,
-  };
-}
-
-/* ------------------------------------------------- yapısal olmayan */
-
-const EV_ICI = [
-  { id: 'dolap',   agirlik: 20, soru: 'Kitaplık, dolap ve gardırop duvara sabitli mi?',
-    yapilacak: 'Devrilebilecek her mobilyayı L profil veya kayışla duvara sabitleyin. Deprem yaralanmalarının büyük kısmı devrilen eşyadan olur.' },
-  { id: 'yatak',   agirlik: 15, soru: 'Yatak ve koltukların üstünde ağır eşya var mı? (tablo, raf, ayna)',
-    ters: true,
-    yapilacak: 'Uyuduğunuz ve uzun süre oturduğunuz yerlerin üstünü boşaltın.' },
-  { id: 'cam',     agirlik: 10, soru: 'Büyük cam yüzeylerde güvenlik filmi var mı?',
-    yapilacak: 'Şeffaf güvenlik filmi camın kırıldığında dağılmasını engeller. Balkon kapısı ve büyük pencerelerden başlayın.' },
-  { id: 'kacis',   agirlik: 15, soru: 'Kaçış yolu (koridor, kapı önü) boş ve kapı kolay açılıyor mu?',
-    yapilacak: 'Koridora eşya koymayın. Dış kapı anahtarını kilitte veya sabit bir yerde tutun.' },
-  { id: 'vana',    agirlik: 10, soru: 'Doğalgaz ve su vanasının yerini biliyor musunuz?',
-    yapilacak: 'Vanaların yerini öğrenin, kapatmayı bir kez deneyin. Ev halkından herkes bilsin.' },
-  { id: 'canta',   agirlik: 15, soru: 'Acil durum çantanız hazır mı?',
-    yapilacak: 'Su, ilaç, düdük, el feneri, powerbank, kimlik fotokopisi, bir miktar nakit. Kapıya yakın bir yerde dursun.' },
-  { id: 'bulusma', agirlik: 15, soru: 'Ailece buluşma noktanız belli mi?',
-    yapilacak: 'Evden uzakta, herkesin yürüyerek gidebileceği açık bir nokta seçin. Telefonlar çalışmayabilir.' },
+  },
+  {
+    id: 'kat',
+    sira: 2,
+    soru: 'Bina kaç kattan oluşuyor? Bodrum katları da dahil edin.',
+    secenekler: [
+      { deger: 'k1_4', etiket: '1–4 kat' },
+      { deger: 'k5_8', etiket: '5–8 kat' },
+      { deger: 'k9_uzeri', etiket: '9 kat ve üzeri' },
+      { deger: 'bilmiyorum', etiket: 'Bilmiyorum' },
+    ],
+  },
+  {
+    id: 'mudahale',
+    sira: 3,
+    soru: 'Zemin katta veya bodrumda taşıyıcı kolon ya da perde duvara müdahale edildiğini biliyor musunuz?',
+    yardim: 'Örneğin dükkân veya otopark alanı açmak amacıyla yapılan müdahaleler.',
+    secenekler: [
+      { deger: 'hayir', etiket: 'Hayır' },
+      { deger: 'evet', etiket: 'Evet' },
+      { deger: 'bilmiyorum', etiket: 'Bilmiyorum' },
+    ],
+  },
+  {
+    id: 'gorunur',
+    sira: 4,
+    soru: 'Kolon, kiriş veya perde gibi taşıyıcı elemanlarda görünür bir sorun fark ettiniz mi?',
+    secenekler: [
+      { deger: 'yok', etiket: 'Görünür bir sorun yok' },
+      { deger: 'catlak', etiket: 'Çatlak veya beton dökülmesi var' },
+      { deger: 'demir', etiket: 'Demir açığa çıkmış veya paslanma var' },
+      { deger: 'egilme', etiket: 'Eğilme ya da belirgin şekil değişikliği var' },
+      { deger: 'emin_degilim', etiket: 'Emin değilim' },
+    ],
+  },
+  {
+    id: 'hasar',
+    sira: 5,
+    soru: 'Binanın daha önce deprem hasarı aldığını veya hasar raporu bulunduğunu biliyor musunuz?',
+    secenekler: [
+      { deger: 'hayir', etiket: 'Hayır' },
+      { deger: 'hafif', etiket: 'Hafif hasar bilgisi var' },
+      { deger: 'orta_agir', etiket: 'Orta veya ağır hasar bilgisi var' },
+      { deger: 'bilmiyorum', etiket: 'Bilmiyorum' },
+    ],
+  },
+  {
+    id: 'ilave',
+    sira: 6,
+    soru: 'Binada sonradan eklenen kat veya proje dışı önemli bir değişiklik olduğunu biliyor musunuz?',
+    secenekler: [
+      { deger: 'hayir', etiket: 'Hayır' },
+      { deger: 'evet', etiket: 'Evet' },
+      { deger: 'bilmiyorum', etiket: 'Bilmiyorum' },
+    ],
+  },
+  {
+    id: 'onceki',
+    sira: 7,
+    soru: 'Binanız daha önce bir uzman tarafından yapısal olarak değerlendirildi mi?',
+    secenekler: [
+      { deger: 'evet', etiket: 'Evet' },
+      { deger: 'hayir', etiket: 'Hayır' },
+      { deger: 'bilmiyorum', etiket: 'Bilmiyorum' },
+    ],
+  },
 ];
 
-/** cevaplar: { dolap: true/false, ... }  true = önlem alınmış (yatak hariç) */
-function yapisalOlmayanSkor(cevaplar) {
-  let skor = 0;
-  const eksikler = [];
-  for (const m of EV_ICI) {
-    const c = cevaplar[m.id];
-    // 'ters' maddede evet = kötü (yatak üstünde ağır eşya VAR mı?)
-    const iyi = m.ters ? c === false : c === true;
-    if (!iyi) {
-      skor += m.agirlik;
-      eksikler.push(m);
-    }
+/* ------------------------------------------------- niteliksel zemin/fay */
+
+function zeminNiteligi(vs30) {
+  if (vs30 == null) {
+    return { sinif: 'veri_yok', metin: 'Bu konumda zemin verisi yok.' };
   }
-  return { toplam: skor, seviye: seviyeBul(skor), eksikler, madde: EV_ICI };
+  let sinif, metin;
+  if (vs30 < 250) {
+    sinif = 'cok_yumusak';
+    metin = 'Çok yumuşak zemin. Sarsıntı belirgin şekilde büyür.';
+  } else if (vs30 < 400) {
+    sinif = 'yumusak';
+    metin = 'Yumuşak zemin. Sarsıntı büyür.';
+  } else if (vs30 < 600) {
+    sinif = 'orta';
+    metin = 'Orta sertlikte zemin.';
+  } else {
+    sinif = 'sert';
+    metin = 'Sert zemin. Sarsıntı büyütmesi sınırlı.';
+  }
+  return { sinif, metin };
 }
 
-/* ------------------------------------------------------- eylem planı */
-
-/* Sonucu "şimdi ne yapacağım"a çevirir.
- *
- * Dört zaman kutusu. Her madde koşullu — kullanıcının kendi skoruna,
- * zeminine, bina yaşına ve çevresindeki mesafelere göre girer ya da girmez.
- * Amaç eksiksiz bir afet el kitabı değil; bu kişinin sırada ne yapacağı.
- */
-function eylemPlani(skor, a, girdi) {
-  const bugun = [], hafta = [], ay = [], yil = [];
-  const km = v => v < 1 ? Math.round(v * 1000) + ' metre' : v.toFixed(1) + ' km';
-
-  const kalem = ad => skor.kalemler.find(k => k.ad === ad) || { puan: 0 };
-  const zeminP = kalem('Zemin').puan;
-  const fayP = kalem('Faya uzaklık').puan;
-  const donemP = kalem('Yapım dönemi').puan;
-  const bilinmiyor = girdi.donem === 'bilmiyorum';
-  const eski = donemP >= 24;          // 1998 öncesi kuşak
-  const cokEski = girdi.donem === 'once1975';
-
-  /* ---- bugün: para gerektirmeyen, bugün bitecek işler ---- */
-  bugun.push({
-    baslik: 'Buluşma noktanızı bugün belirleyin',
-    metin: a.toplanma && a.toplanma.km <= 1.5
-      ? `En yakın kayıtlı toplanma alanı ${km(a.toplanma.km)} uzakta. `
-        + 'Ev halkıyla birlikte bir kez yürüyün — deprem anında telefonlar '
-        + 'çalışmayabilir, herkesin aynı yeri biliyor olması gerekir.'
-      : `Yakınınızda kayıtlı toplanma alanı ${a.toplanma ? km(a.toplanma.km) + ' uzakta' : 'bulunamadı'}. `
-        + 'Bu liste eksik olduğu için kendi noktanızı seçin: binalardan uzak, '
-        + 'üstünde elektrik teli olmayan açık bir alan. Ev halkıyla birlikte yürüyün.',
-  });
-  bugun.push({
-    baslik: 'Gaz ve su vanasının yerini öğrenin',
-    metin: 'Her ikisini de bir kez kapatıp açın. Evdeki herkes yerini bilsin. '
-         + 'Vananın yanına uygun anahtarı asın.',
-  });
-  if (a.yol && a.yol.km <= 1.0) {
-    bugun.push({
-      baslik: `Tahliye yolunuz: ${a.yol.ad}`,
-      metin: `${km(a.yol.km)} uzaktaki bu yol, İBB'nin afet sonrası öncelikli `
-           + 'açık tutacağı 1. derece acil ulaşım ağında. Yardım bu ağdan gelir, '
-           + 'tahliye bu ağdan olur. Oraya yaya nasıl çıkacağınızı bilin.',
-    });
-  }
-
-  /* ---- bu hafta: küçük harcama, büyük fayda ---- */
-  hafta.push({
-    baslik: 'Devrilecek her şeyi duvara sabitleyin',
-    metin: (zeminP >= 20
-      ? 'Zemininiz yumuşak; sarsıntı burada daha uzun ve daha geniş genlikli '
-        + 'hissedilir, mobilya devrilmesi olasılığı artar. '
-      : '')
-      + 'Kitaplık, gardırop, buzdolabı, televizyon. L profil ve kayış birkaç '
-      + 'yüz liradır; deprem yaralanmalarının büyük bölümü devrilen eşyadandır.',
-  });
-  hafta.push({
-    baslik: 'Yatakların ve koltukların üstünü boşaltın',
-    metin: 'Ağır tablo, ayna, raf — uzun süre bulunduğunuz yerlerin üstünde '
-         + 'olmasın. Bu hiç para gerektirmez.',
-  });
-  hafta.push({
-    baslik: 'Acil çantayı hazırlayın, kapıya yakın koyun',
-    metin: 'Su, üç günlük ilaç, düdük, el feneri, powerbank, kimlik fotokopisi, '
-         + 'nakit, kalın eldiven. Düdük en çok atlanan ve enkazda en çok işe '
-         + 'yarayan parçadır.',
-  });
-
-  /* ---- bu ay: binanın kendisi ---- */
-  if (eski) {
-    ay.push({
-      baslik: cokEski
-        ? 'Riskli yapı tespiti başvurusu — bu maddeyi öne alın'
-        : 'Binaya yapısal değerlendirme yaptırın',
-      metin: (cokEski
-        ? 'Binanız modern deprem yönetmeliği öncesinden. '
-        : 'Binanız 1999 öncesi yönetmelik kuşağından; kurallar o depremden '
-          + 'sonra köklü biçimde değişti. ')
-        + 'Çevre ve Şehircilik Bakanlığı lisanslı kuruluşlarına başvurup riskli '
-        + 'yapı tespiti yaptırabilirsiniz. Başvuru için tüm maliklerin '
-        + 'anlaşması gerekmez — tek malik de başlatabilir.',
-      vurgu: true,
-    });
-    ay.push({
-      baslik: 'Kat malikleriyle konuyu açın',
-      metin: 'Tespit ve olası güçlendirme malik çoğunluğunun kararıyla '
-           + 'ilerler. Masrafı bölüştürmek hem yükü hem süreyi azaltır. '
-           + 'Toplantıya bu sayfanın çıktısıyla gidebilirsiniz.',
-    });
-  } else if (bilinmiyor) {
-    ay.push({
-      baslik: 'Önce yapım yılını öğrenin',
-      metin: 'Bu hesapta en ağır kalem binanın hangi yönetmelik kuşağından '
-           + 'olduğu — ve sizde o bilgi yok. Yönetimden ya da belediyenin imar '
-           + 'müdürlüğünden yapı ruhsatı tarihini isteyin, sonra bu '
-           + 'değerlendirmeyi tekrarlayın. Sonuç ciddi biçimde değişebilir.',
-      vurgu: true,
-    });
+function fayNiteligi(km) {
+  let sinif, metin;
+  if (km < 10) {
+    sinif = 'cok_yakin';
+    metin = 'Faya çok yakın. Yer hareketi en şiddetli bu bantta olur.';
+  } else if (km < 20) {
+    sinif = 'yakin';
+    metin = 'Faya yakın.';
+  } else if (km < 40) {
+    sinif = 'orta';
+    metin = 'Orta mesafe.';
   } else {
-    ay.push({
-      baslik: 'Bina dosyasını görün',
-      metin: 'Yönetimden yapı ruhsatını, yapı denetim raporunu ve varsa zemin '
-           + 'etüdünü isteyin. Binanız görece yeni bir yönetmelik kuşağından, '
-           + 'ama belgesi olmayan bina hakkında hiçbir şey bilinmiyor demektir.',
-    });
+    sinif = 'uzak';
+    metin = 'Bilinen faylardan görece uzak.';
   }
-  ay.push({
-    baslik: 'DASK poliçenizi kontrol edin',
-    metin: 'Zorunlu deprem sigortası konutlar için zorunludur ve poliçe metrekare '
-         + 'üzerinden hesaplanır. Poliçeniz varsa güncel metrekare ve adresle '
-         + 'eşleştiğini doğrulayın; yoksa bu ay yaptırın.',
-  });
-  if (skor.rezonans && skor.rezonans.yakinlik > 0.7) {
-    ay.push({
-      baslik: 'Değerlendirmede bunu mutlaka söyleyin',
-      metin: `Bu zeminin tahmini titreşim periyodu ${skor.rezonans.Ts} saniye, `
-           + `${girdi.kat} katlı bir binanınki kabaca ${skor.rezonans.Tb} saniye. `
-           + 'İkisi birbirine yakın olduğunda bina zeminle aynı ritimde salınır '
-           + 've zorlanma artar. Mühendise "zemin-yapı periyot uyumu" diye sorun.',
-    });
+  return { sinif, metin };
+}
+
+/* ------------------------------------------------- prototip yönlendirme */
+
+/**
+ * PROTOTİP UI YÖNLENDİRME MANTIĞI — mühendislik modeli değildir.
+ * Doğrulanmış bir değerlendirme servisiyle değiştirilebilmesi için izole tutulmuştur.
+ * Sayısal değer döndürmez. Bölgesel veriyi girdi olarak ALMAZ.
+ */
+function deriveDemoStructuralPriority(cevaplar) {
+  // Yeterlilik kontrolü: 7'nin 3'ünden fazlası boş veya şüphelilikler
+  const keyler = Object.keys(cevaplar);
+  const yanits = keyler.length;
+  const sekilliKelimeler = ['bilmiyorum', 'emin_degilim'];
+  const seklililer = Object.values(cevaplar).filter(v => sekilliKelimeler.includes(v)).length;
+
+  if (yanits < 5 || seklililer >= 3) {
+    return {
+      priority: 'insufficient_information',
+      title: 'Değerlendirme için bilgi yetersiz',
+      summary: 'Paylaştığınız bilgilerle anlamlı bir ön değerlendirme oluşturamıyoruz. Eksik bilgileri tamamlayabilir veya bir uzmandan destek alabilirsiniz.',
+      factors: [],
+      missingInformation: [],
+      recommendations: [],
+      isDemo: true,
+    };
   }
 
-  /* ---- bu yıl / kalıcı ---- */
-  if (fayP >= 14) {
-    yil.push({
-      baslik: 'Yakın fay ne demek, ne demek değil',
-      metin: `En yakın bilinen fay ${a.fay.km.toFixed(1)} km uzakta (${a.fay.ad}). `
-           + 'Yakınlık sarsıntının şiddetini artırır ama binanın dayanımı hâlâ '
-           + 'daha belirleyicidir. Faya uzak olsaydınız da zayıf bina risklidir; '
-           + 'faya yakın sağlam bina ise ayakta kalır. Enerjiyi binaya harcayın.',
-    });
+  // Güçlü uyarılar
+  const mudahaleEvet = cevaplar.mudahale === 'evet';
+  const gorunurUyari = ['catlak', 'demir', 'egilme'].includes(cevaplar.gorunur);
+  const hasarAgir = cevaplar.hasar === 'orta_agir';
+  const gucluUyarı = mudahaleEvet || gorunurUyari || hasarAgir;
+
+  if (gucluUyarı) {
+    return {
+      priority: 'priority_review',
+      title: 'Öncelikli uzman değerlendirmesi öneriliyor',
+      summary: 'Paylaştığınız bilgiler, gecikmeden uzman görüşü alınmasını anlamlı hale getiren bazı uyarılar içeriyor. Bu sonuç kesin bir hasar veya güvenlik tespiti değildir.',
+      factors: [],
+      missingInformation: [],
+      recommendations: [],
+      isDemo: true,
+    };
   }
-  if (a.ilce && a.ilce.m2kisi && a.ilce.m2kisi < 15) {
-    yil.push({
-      baslik: `${a.ilce.ad}'de açık alan dar`,
-      metin: `İlçenizde senaryo barınma ihtiyacı başına ${a.ilce.m2kisi} m² açık `
-           + 'alan düşüyor (yalnızca İBB envanteri; okul bahçesi, ilçe parkları '
-           + 'hariç — yani gerçek rakam biraz daha yüksek). Yine de dar. '
-           + 'Şehir dışında kalabileceğiniz bir yer ve oraya nasıl gideceğiniz '
-           + 'ailece konuşulmuş olsun.',
-    });
+
+  // Dikkat etkenler
+  const donemOnce1999 = cevaplar.donem === 'once1999';
+  const ilaveEvet = cevaplar.ilave === 'evet';
+  const oncekiHayir = cevaplar.onceki === 'hayir';
+  const hasarHafif = cevaplar.hasar === 'hafif';
+  const dikkatSayisi = [donemOnce1999, ilaveEvet, oncekiHayir, hasarHafif].filter(Boolean).length
+                       + (seklililer > 1 ? 1 : 0);
+
+  if (dikkatSayisi >= 1) {
+    return {
+      priority: 'detailed_review',
+      title: 'Daha ayrıntılı değerlendirme faydalı olabilir',
+      summary: 'Paylaştığınız bilgilerde daha ayrıntılı değerlendirilmesi faydalı olabilecek bazı noktalar bulunuyor. Kesin sonuç için yetkili uzman incelemesi gerekir.',
+      factors: [],
+      missingInformation: [],
+      recommendations: [],
+      isDemo: true,
+    };
   }
-  yil.push({
-    baslik: 'Yılda bir gözden geçirin',
-    metin: 'Çantadaki ilaç ve pil tarihleri, sabitlemelerin gevşeyip gevşemediği, '
-         + 'buluşma noktasının hâlâ uygun olup olmadığı. Takvime bir hatırlatma '
-         + 'koyun.',
-  });
 
   return {
-    bugun, hafta, ay, yil,
-    // en kritik tek cümle: kullanıcı sadece bunu okusa ne okumalı
-    tekCumle: bilinmiyor
-      ? 'Önce binanın yapım yılını öğrenin — en belirleyici bilgi bu ve '
-        + 'yönetimden ruhsat tarihini istemek bir telefon sürüyor.'
-      : eski
-        ? 'Bu binanın yapısal durumunu bir uzmana baktırmadan geri kalan her şey '
-          + 'eksik kalır — bu ay başlatın.'
-        : zeminP >= 20
-          ? 'Bina kuşağınız görece iyi; enerjinizi ev içindeki devrilecek eşyaya '
-            + 've buluşma planına verin.'
-          : 'Temel etkenler görece olumlu. Ev içi hazırlığı tamamlayıp yılda bir '
-            + 'gözden geçirmek yeterli.',
+    priority: 'no_prominent_warning',
+    title: 'Paylaştığınız bilgilerde belirgin bir uyarı tespit edilmedi',
+    summary: 'Bu sonuç binanızın güvenli olduğunu göstermez veya garanti etmez. Yapısal güvenlik ancak yetkili uzmanlar tarafından yapılacak teknik incelemelerle değerlendirilebilir.',
+    factors: [],
+    missingInformation: [],
+    recommendations: [],
+    isDemo: true,
   };
 }
+
+/* ------------------------------------------------- bölgesel bağlam */
+
+function ilceListesi(D) {
+  return (D.ilceler || [])
+    .map(il => il.ad)
+    .sort();
+}
+
+function ilceBilgisi(D, ilceAdi) {
+  return (D.ilceler || []).find(il => il.ad === ilceAdi) || null;
+}
+
+/**
+ * Sonucu ETKİLEMEZ. Yalnızca bağlam ekranını besler.
+ * Sayı döndürebilir ama bunlar risk skoru değil, kaynak verinin kendisidir (mesafe, m², kişi).
+ */
+function bolgeselBaglam(D, ilceAdi) {
+  const ilce = ilceBilgisi(D, ilceAdi);
+  if (!ilce) return null;
+
+  const zeminNit = zeminNiteligi(ilce.vs30);
+  const fayNit = fayNiteligi(ilce.fay_km);
+
+  return {
+    konumEtiketi: ilceAdi,
+    veriDurumu: 'mevcut',
+    nitelikselBaglam: [
+      { baslik: 'Zemin niteliği', metin: zeminNit.metin },
+      { baslik: 'Fay yakınlığı', metin: fayNit.metin },
+      {
+        baslik: 'Açık alan',
+        metin: ilce.yesil_ha && ilce.m2kisi
+          ? `Bu ilçede senaryo barınma ihtiyacına göre ${ilce.m2kisi} m² açık alan düşüyor.`
+          : 'Açık alan bilgisi yok.',
+      },
+    ],
+    veriTarihi: '2024–2026',
+    kaynak: 'Demo veri (İBB deprem senaryosu, USGS Vs30, Kandilli Fay Veritabanı)',
+    sinirlar: [
+      'Bu bilgiler ilçe ölçeğindedir.',
+      'Binanızın zeminini veya deprem performansını göstermez.',
+      'Bölgesel tehlike ile binanın yapısal performansı aynı şey değildir.',
+    ],
+  };
+}
+
+/* ------------------------------------------------- sabit metinler */
+
+const YAPISAL_SINIR_METNI = 'Bu değerlendirme binanızın depremde güvenli veya güvensiz olduğunu göstermez. Yapısal güvenlik ancak yetkili uzmanlar tarafından yapılacak teknik incelemelerle değerlendirilebilir.';
+
+const SOYLEYEMEYECEKLERIMIZ = [
+  'Binanıza güçlendirme yapılması gerektiğini.',
+  'Binanızın riskli olduğunu veya güvenli olduğunu.',
+  'Binayı yıkmanız gerektiğini.',
+  'Kentsel dönüşüme girmeniz gerektiğini.',
+];
+
+const DEGERLENDIRME_SECENEKLERI = [
+  {
+    id: 'on_inceleme',
+    baslik: 'Ön inceleme / hızlı tarama',
+    neYapar: 'Mühendis tarafından yapılan görsel inceleme. Açık yapısal sorunları ortaya çıkarabilir.',
+    neYapmaz: 'Kesin mühendislik hesapları, deprem performans analizi, resmi tespiti çıkartmaz.',
+    not: 'Başlangıç için uygun; sonucu yorumlamak için uzmandan destek gerekir.',
+  },
+  {
+    id: 'performans_analizi',
+    baslik: 'Deprem performans analizi',
+    neYapar: 'Tam mühendislik değerlendirmesi. Binanın deprem sırasında nasıl davranacağını tahmin eder.',
+    neYapmaz: 'Kendisi başlangıç/ön inceleme yerine geçmez; ön inceleme bulguları üzerine yapılır.',
+    not: 'Nitelikli özel mühendislik firması gerekir. Maliyeti daha yüksek.',
+  },
+  {
+    id: 'riskli_yapı_tespiti',
+    baslik: 'Riskli yapı tespiti',
+    neYapar: 'Resmi, yasal geçerliliği olan tespite sonuç. 6306 sayılı Kanun kapsamı.',
+    neYapmaz: 'Başlangıç incelemesi değil; mühendislik raporunun formal hale gelmesi.',
+    not: 'Belediye yönlendirmesi ile lisanslı kuruluşa yapılır. Yasal sonuç taşır.',
+  },
+];
+
+const DEGERLENDIRME_SECENEK_NOTU = 'Bu seçeneklerin hangisinin binanıza uygun olduğu, yetkili uzmanların yapacağı teknik inceleme sonucunda belirlenebilir.';
+
+const BOLGESEL_UYARI = 'Bir bölgenin deprem tehlikesi ile bir binanın yapısal performansı aynı şey değildir.';
+
+const BOLGESEL_KAPSAM = 'Bu bilgiler ilçe ölçeğindedir ve binanızın zeminini veya deprem performansını göstermez.';
+
+/* ------------------------------------------------- birleşik özet */
+
+function birlesikOzet(yapisalSonuc, evDurumu) {
+  const binanBolumu = yapisalSonuc
+    ? { durum: 'tamam', metin: yapisalSonuc.title }
+    : { durum: 'eksik', metin: 'Binanız hakkında değerlendirme tamamlanmadı. Bina değerlendirmesine dönebilirsiniz.' };
+
+  const evinBolumu = evDurumu && evDurumu.cevaplar
+    ? { durum: 'tamam', metin: `Ev içi kontrol listesinin tamamlandığını gösteriyor.` }
+    : { durum: 'eksik', metin: 'Ev içi kontrol listesi tamamlanmadı. Ev içi kontrol listesine dönebilirsiniz.' };
+
+  return {
+    binan: binanBolumu,
+    evin: evinBolumu,
+    ilkOnceligin: 'Bu hafta: En yakın toplantı noktasını belirleyin ve ev içindeki devrilecek mobilyaları sabitlemeye başlayın.',
+  };
+}
+
+const OZET_DESTEK = 'Sonraki adımları küçük küçük tamamlamak, hiçbir şey yapmamaktan daha değerlidir.';
 
 if (typeof module !== 'undefined') {
   module.exports = {
-    SEVIYELER, YONETMELIK, EV_ICI, seviyeBul, vs30Oku, mesafeKm, cizgiyeMesafe,
-    enYakinFay, ilceBul, enYakinTesis, enYakinYol, konumAnalizi, zeminPuani,
-    fayPuani, katPuani, yapisalSkor, yapisalOlmayanSkor, eylemPlani,
+    kis, vs30Oku, mesafeKm, cizgiyeMesafe, enYakinFay, noktaHalkada, ilceBul,
+    enYakinTesis, enYakinYol, konumAnalizi, YAPISAL_SORULAR, zeminNiteligi,
+    fayNiteligi, deriveDemoStructuralPriority, ilceListesi, ilceBilgisi,
+    bolgeselBaglam, YAPISAL_SINIR_METNI, SOYLEYEMEYECEKLERIMIZ,
+    DEGERLENDIRME_SECENEKLERI, DEGERLENDIRME_SECENEK_NOTU, BOLGESEL_UYARI,
+    BOLGESEL_KAPSAM, birlesikOzet, OZET_DESTEK,
   };
 }

@@ -2,9 +2,10 @@
   <div class="kapsa ic">
     <a class="marka" href="#ust">deprem<b>lab</b></a>
     <nav aria-label="Ana menü">
-      <a href="#basla">Değerlendirme</a>
-      <a href="harita.html">Harita</a>
+      <a href="#bolum-giris">Başla</a>
+      <a href="harita.html">Harita<br><small>Genel bilgi amaçlıdır</small></a>
       <a href="#veri">Veri</a>
+      <button type="button" id="sifirla" class="dugme-baslik" title="Değerlendirmeyi sıfırla">Sıfırla</button>
     </nav>
   </div>
 </header>
@@ -24,155 +25,204 @@
     </div>
 
     <div class="kapsa hero-ic">
-      <h1 id="hero-baslik">Eviniz depreme ne kadar hazır?</h1>
+      <h1 id="hero-baslik">Depreme ne kadar hazırsın?</h1>
       <p class="alt">
-        Konumunuzun zeminini, en yakın fayı ve binanızın özelliklerini
-        birlikte değerlendirir. Beş dakika sürer, hiçbir bilgi kaydedilmez.
+        Binan hakkında bildiklerini anlamlandır, evindeki riskleri azalt ve bugün atabileceğin ilk adımları gör.
       </p>
-      <div class="dugme-sira">
-        <a class="dugme" href="#basla">Değerlendirmeye başla</a>
-        <a class="dugme ikincil" href="harita.html">Haritayı aç</a>
+    </div>
+  </section>
+
+  <!-- ============================================ bölüm 1: giriş (landing) -->
+  <section class="asama kapsa" id="bolum-giris" aria-labelledby="a1">
+    <h2 id="a1">Depreme ne kadar hazırsın?</h2>
+    <p class="giris">
+      Binan hakkında bildiklerini anlamlandır, evindeki riskleri azalt ve bugün atabileceğin ilk adımları gör.
+    </p>
+
+    <!-- üç fayda maddesi -->
+    <div class="fayda-sira">
+      <div class="fayda">
+        <h3>Binanı anla</h3>
+        <p>Elindeki bina bilgilerini daha anlamlı hale getir.</p>
       </div>
-      <p class="kaynak-satiri">
-        Arka plandaki çizgiler gerçek fay hatlarıdır — Marmara ve çevresi.
+      <div class="fayda">
+        <h3>Evini hazırla</h3>
+        <p>Ev içindeki azaltabileceğin riskleri fark et.</p>
+      </div>
+      <div class="fayda">
+        <h3>İlk adımını bul</h3>
+        <p>Sana uygun, uygulanabilir önerileri gör.</p>
+      </div>
+    </div>
+
+    <!-- iki modül kartı -->
+    <div class="modul-kartlar">
+      <div class="modul-kart">
+        <h3>Yapısal Ön Değerlendirme</h3>
+        <p>Binanız hakkında bildiklerinizi gözden geçirin ve profesyonel değerlendirmeye ne kadar öncelik vermeniz gerektiğini anlayın.</p>
+        <p class="sure">Yaklaşık 5 dakika</p>
+        <button type="button" id="git-gizlilik-yapisal" class="dugme">Binamı değerlendirmeye başla</button>
+      </div>
+      <div class="modul-kart">
+        <h3>Yapısal Olmayan Risk Kontrolü</h3>
+        <p>Evinizde devrilebilecek, düşebilecek veya çıkış yolunu engelleyebilecek riskleri kontrol edin.</p>
+        <p class="sure">Yaklaşık 3 dakika</p>
+        <button type="button" id="git-gizlilik-evici" class="dugme">Evimi kontrol etmeye başla</button>
+      </div>
+    </div>
+
+    <!-- feragat -->
+    <div class="bilgi-notu">
+      <p>Bu araç resmî bina risk tespiti veya deprem performans analizi yerine geçmez.</p>
+    </div>
+  </section>
+
+  <!-- ============================================ bölüm 2: gizlilik -->
+  <section class="asama kapsa" id="bolum-gizlilik" hidden aria-labelledby="a2">
+    <h2 id="a2">Başlamadan önce</h2>
+    <div class="bilgi-govdesi">
+      <p>
+        Bu prototip kayıt gerektirmez. Girdiğiniz adres ve yanıtlar yalnızca bu sayfa açıkken size örnek bir değerlendirme sunmak için kullanılır. Bilgileriniz bir sunucuya gönderilmez ve kalıcı olarak saklanmaz.
       </p>
+      <p class="not">Sayfayı yenilediğinizde veya kapattığınızda girdiğiniz bilgiler silinir.</p>
+    </div>
+    <div class="dugme-sira">
+      <button type="button" id="gizlilik-devam" class="dugme">Anladım, devam et</button>
     </div>
   </section>
 
-  <!-- ============================================ 1.0 seçim -->
-  <section class="asama kapsa" id="basla" aria-labelledby="a1">
-    <span class="asama-no">1.0 · NEREDEN BAŞLAYALIM</span>
-    <h2 id="a1">İki ayrı konu var</h2>
+  <!-- ============================================ bölüm 3: adres -->
+  <section class="asama kapsa" id="bolum-adres" hidden aria-labelledby="a3">
+    <h2 id="a3">Önce yaşadığın yeri bulalım.</h2>
     <p class="giris">
-      Depremde zarar iki yerden gelir: binanın kendisinden, bir de evin
-      içindeki eşyalardan. İkisi ayrı ayrı değerlendirilir.
+      Adresiniz yalnızca bu sayfa açıkken demo bölgesel bilgileri göstermek için kullanılır. Bir sunucuya gönderilmez veya saklanmaz.
     </p>
 
-    <div class="kutular">
-      <button type="button" class="kutu" id="kutu-yapisal" aria-pressed="false">
-        <span class="kutu-no">A</span>
-        <h3>Binanın kendisi</h3>
-        <p>
-          Zemin, faya uzaklık, yapım yılı ve kat sayısı. Konumunuzu alıp
-          harita verisiyle birleştirir.
-        </p>
-        <span class="devam" aria-hidden="true">Bu değerlendirmeyi yap →</span>
-      </button>
+    <form class="adres-formu">
+      <fieldset>
+        <legend class="gizli-metin">Adres bilgileri</legend>
 
-      <button type="button" class="kutu" id="kutu-evici" aria-pressed="false">
-        <span class="kutu-no">B</span>
-        <h3>Evin içi</h3>
-        <p>
-          Devrilecek eşya, cam, kaçış yolu, acil çanta. Yedi soru — konum
-          gerekmez.
-        </p>
-        <span class="devam" aria-hidden="true">Bu değerlendirmeyi yap →</span>
-      </button>
+        <div class="form-alan">
+          <label for="adres-ilce">İlçe</label>
+          <select id="adres-ilce" required>
+            <option value="">Seçin…</option>
+          </select>
+        </div>
+
+        <div class="form-alan">
+          <label for="adres-mahalle">Mahalle</label>
+          <input type="text" id="adres-mahalle" placeholder="Mahalle adı">
+        </div>
+
+        <div class="form-alan">
+          <label for="adres-sokak">Sokak</label>
+          <input type="text" id="adres-sokak" placeholder="Sokak adı">
+        </div>
+
+        <div class="form-alan">
+          <label for="adres-bina">Bina numarası</label>
+          <input type="text" id="adres-bina" placeholder="Numarası">
+        </div>
+
+        <div id="adres-hata" role="alert" class="hata-mesaji"></div>
+      </fieldset>
+    </form>
+
+    <div class="dugme-sira">
+      <button type="button" id="adres-devam" class="dugme">Bölgesel bilgileri gör</button>
+      <button type="button" class="dugme ikincil" data-git="bolum-giris">Geri dön</button>
     </div>
   </section>
 
-  <!-- ============================================ 2.0 yapısal: konum -->
-  <section class="asama kapsa" id="bolum-konum" hidden aria-labelledby="a2">
-    <span class="asama-no">2.0 · KONUM</span>
-    <h2 id="a2">Binanız nerede?</h2>
+  <!-- ============================================ bölüm 4: bölgesel -->
+  <section class="asama kapsa" id="bolum-bolgesel" hidden aria-labelledby="a4">
+    <h2 id="a4">Bölgesel bilgiler</h2>
+    <div id="bolgesel-govde"></div>
+    <div class="dugme-sira">
+      <button type="button" id="bolgesel-devam" class="dugme">Bina sorularına devam et</button>
+      <button type="button" class="dugme ikincil" data-git="bolum-adres">Geri dön</button>
+    </div>
+  </section>
+
+  <!-- ============================================ bölüm 5: sorular -->
+  <section class="asama kapsa" id="bolum-sorular" hidden aria-labelledby="a5">
+    <h2 id="a5">Bina hakkında sorularımız var</h2>
+    <div id="adim-gostergesi"></div>
+    <div id="soru-govde"></div>
+    <p id="soru-ilerleme" class="ilerleme-metni"></p>
+    <div class="dugme-sira">
+      <button type="button" id="soru-geri" class="dugme ikincil" disabled>Geri</button>
+      <button type="button" id="soru-ileri" class="dugme" disabled>İleri</button>
+    </div>
+  </section>
+
+  <!-- ============================================ bölüm 6: gözden geçir -->
+  <section class="asama kapsa" id="bolum-gozden-gecir" hidden aria-labelledby="a6">
+    <h2 id="a6">Yanıtlarınızı gözden geçirin</h2>
+    <div id="gozden-gecir-govde"></div>
+    <div class="dugme-sira">
+      <button type="button" id="gozden-gecir-onayla" class="dugme">Onayla ve sonucu gör</button>
+      <button type="button" class="dugme ikincil" data-git="bolum-sorular">Geri dön</button>
+    </div>
+  </section>
+
+  <!-- ============================================ bölüm 7: yapısal sonuç -->
+  <section class="asama kapsa" id="bolum-yapisal-sonuc" hidden aria-labelledby="a7">
+    <h2 id="a7">Yapısal Değerlendirme Sonucu</h2>
+    <div id="yapisal-sonuc-govde"></div>
+    <div class="dugme-sira">
+      <button type="button" id="yapisal-sonuc-devam" class="dugme">Kontrol listesine devam et</button>
+      <button type="button" class="dugme ikincil" data-git="bolum-giris">Başa dön</button>
+    </div>
+  </section>
+
+  <!-- ============================================ bölüm 8: kontrol listesi -->
+  <section class="asama kapsa" id="bolum-kontrol" hidden aria-labelledby="a8">
+    <h2 id="a8">Şimdi evin içini kontrol edelim.</h2>
+    <p class="giris">Bu kısa kontrol listesi, evinizde azaltabileceğiniz yapısal olmayan riskleri fark etmenize yardımcı olur.</p>
+    <div id="adim-gostergesi-2"></div>
+    <div id="kontrol-govde"></div>
+    <p id="kontrol-ilerleme" class="ilerleme-metni"></p>
+    <div class="dugme-sira">
+      <button type="button" id="kontrol-geri" class="dugme ikincil" disabled>Geri</button>
+      <button type="button" id="kontrol-ileri" class="dugme" disabled>İleri</button>
+      <button type="button" id="kontrol-bitir" class="dugme" hidden>Bitir</button>
+    </div>
+  </section>
+
+  <!-- ============================================ bölüm 9: ev sonucu -->
+  <section class="asama kapsa" id="bolum-ev-sonuc" hidden aria-labelledby="a9">
+    <h2 id="a9">Ev hazırlık planın</h2>
+    <div id="ev-sonuc-govde"></div>
+    <div class="dugme-sira">
+      <button type="button" id="ev-sonuc-ozet" class="dugme">Hazırlık planını gör</button>
+      <button type="button" class="dugme ikincil" data-git="bolum-giris">Başa dön</button>
+    </div>
+  </section>
+
+  <!-- ============================================ bölüm 10: özet -->
+  <section class="asama kapsa" id="bolum-ozet" hidden aria-labelledby="a10">
+    <h2 id="a10">Hazırlık planın</h2>
+    <div id="ozet-govde"></div>
+    <div class="dugme-sira">
+      <button type="button" id="ozet-yapisala-don" class="dugme ikincil" hidden>Bina değerlendirmesine dön</button>
+      <button type="button" id="ozet-evicine-don" class="dugme ikincil" hidden>Yapılacaklar listeme dön</button>
+      <button type="button" class="dugme ikincil" data-git="bolum-giris">Başa dön</button>
+    </div>
+  </section>
+
+  <!-- ============================================ bölüm 11: bulunamadı -->
+  <section class="asama kapsa" id="bolum-bulunamadi" hidden aria-labelledby="a11">
+    <h2 id="a11">Sayfa bulunamadı</h2>
+    <p>Girdiğiniz bölüm mevcut değil.</p>
+    <button type="button" class="dugme" data-git="bolum-giris">Başa dön</button>
+  </section>
+
+  <!-- ============================================ veri / kaynaklar -->
+  <section class="asama kapsa" id="veri" aria-labelledby="a12">
+    <h2 id="a12">Bu sonuç neye dayanıyor?</h2>
     <p class="giris">
-      Konum yalnızca tarayıcınızda kullanılır, hiçbir yere gönderilmez.
-    </p>
-
-    <div class="dugme-sira">
-      <button type="button" class="dugme" id="btn-konum">
-        Konumumu bul
-      </button>
-      <button type="button" class="dugme ikincil" id="btn-harita-sec">
-        Haritadan seçeyim
-      </button>
-    </div>
-
-    <div class="konum-durum" id="konum-durum" role="status" aria-live="polite">
-      <span class="sim" aria-hidden="true">·</span>
-      <span id="konum-metin">Henüz konum seçilmedi.</span>
-    </div>
-
-    <div id="secim-harita" hidden></div>
-    <p class="yardim" id="harita-yardim" hidden>
-      Haritada binanızın bulunduğu yere dokunun. Yakınlaştırmak için iki
-      parmağınızı kullanın.
-    </p>
-
-    <div class="dugme-sira">
-      <button type="button" class="dugme" id="btn-konum-devam" disabled>
-        Devam et
-      </button>
-      <button type="button" class="dugme ikincil" data-geri="basla">Geri dön</button>
-    </div>
-  </section>
-
-  <!-- ============================================ 3.0 yapısal: bina -->
-  <section class="asama kapsa" id="bolum-bina" hidden aria-labelledby="a3">
-    <span class="asama-no">3.0 · BİNA</span>
-    <h2 id="a3">Binanız hakkında iki soru</h2>
-
-    <fieldset class="alan">
-      <legend>Bina hangi yıllarda yapıldı?</legend>
-      <p class="yardim">
-        Tam yılı bilmiyorsanız yaklaşık olanı seçin. Deprem yönetmeliği
-        1975, 1998, 2007 ve 2018'de değişti — bina hangi kurala göre
-        yapıldıysa o önemli.
-      </p>
-      <div class="secenekler" id="donem-secenekler"></div>
-    </fieldset>
-
-    <div class="alan">
-      <label class="etiket" for="kat">Bina kaç katlı?</label>
-      <p class="yardim">
-        Zemin kat dahil, bodrum hariç. Örnek: zemin + 4 kat ise 5 yazın.
-      </p>
-      <input type="number" id="kat" min="1" max="60" step="1" value="5"
-             inputmode="numeric" aria-describedby="kat-yardim">
-    </div>
-
-    <div class="dugme-sira">
-      <button type="button" class="dugme" id="btn-hesapla">Sonucu göster</button>
-      <button type="button" class="dugme ikincil" data-geri="bolum-konum">Geri dön</button>
-    </div>
-  </section>
-
-  <!-- ============================================ 2.0 ev içi -->
-  <section class="asama kapsa" id="bolum-evici" hidden aria-labelledby="a4">
-    <span class="asama-no">2.0 · EVİN İÇİ</span>
-    <h2 id="a4">Yedi soru</h2>
-    <p class="giris">
-      Her soruyu evinizi düşünerek yanıtlayın. Emin değilseniz "hayır"
-      işaretleyin — sonunda ne yapabileceğinizi yazacağız.
-    </p>
-
-    <div id="evici-sorular"></div>
-
-    <div class="dugme-sira">
-      <button type="button" class="dugme" id="btn-evici-hesapla">Sonucu göster</button>
-      <button type="button" class="dugme ikincil" data-geri="basla">Geri dön</button>
-    </div>
-  </section>
-
-  <!-- ============================================ 4.0 sonuç -->
-  <section class="asama kapsa" id="bolum-sonuc" hidden aria-labelledby="a5">
-    <span class="asama-no">4.0 · SONUÇ</span>
-    <h2 id="a5">Değerlendirme</h2>
-    <div id="sonuc-govde"></div>
-
-    <div class="dugme-sira">
-      <button type="button" class="dugme ikincil" id="btn-bastan">Baştan başla</button>
-      <a class="dugme ikincil" href="harita.html">Haritada incele</a>
-    </div>
-  </section>
-
-  <!-- ============================================ veri -->
-  <section class="asama kapsa" id="veri" aria-labelledby="a6">
-    <span class="asama-no">5.0 · VERİ</span>
-    <h2 id="a6">Bu sonuç neye dayanıyor?</h2>
-    <p class="giris">
-      Dört açık kaynak kullanılıyor. Hepsi indirilebilir, hesap tekrar
-      üretilebilir.
+      Dört açık kaynak kullanılıyor. Hepsi indirilebilir, hesap tekrar üretilebilir.
     </p>
     <div class="mesafeler">
       <div class="mesafe">
@@ -193,21 +243,31 @@
       </div>
     </div>
   </section>
+
 </main>
+
+<!-- ============================================ sıfırlama diyaloğu -->
+<dialog id="sifirla-diyalog" class="diyalog">
+  <div class="diyalog-ic">
+    <h3>Değerlendirmeyi sıfırlamak istediğinize emin misiniz?</h3>
+    <p>Tüm girdiğiniz bilgiler silinecektir.</p>
+    <div class="dugme-sira">
+      <button type="button" id="sifirla-onayla" class="dugme">Evet, sıfırla</button>
+      <button type="button" id="sifirla-vazgec" class="dugme ikincil">Vazgeç</button>
+    </div>
+  </div>
+</dialog>
+
+<!-- ============================================ durum duyuruları (aria-live) -->
+<div id="duyuru" role="status" aria-live="polite" aria-atomic="true" class="gizli-metin"></div>
 
 <footer class="ayak">
   <div class="kapsa">
     <p class="beyan">
-      Bu bir tahmindir, rapor değildir. Binanızın gerçek durumunu
-      yalnızca yerinde inceleme söyleyebilir.
+      Bu bir tahmindir, rapor değildir. Binanızın gerçek durumunu yalnızca yerinde inceleme söyleyebilir.
     </p>
     <p class="kucuk">
-      Hesap; zemin sertliği, faya uzaklık, yapım dönemi ve kat sayısı
-      üzerinden kaba bir gösterge üretir. Binanın taşıyıcı sistemi, malzeme
-      kalitesi, zemin etüdü ve yapılan tadilatlar bu hesapta yoktur — ve
-      bunlar çoğu zaman belirleyici olandır. Sonuç düşük çıksa bile bina
-      riskli, yüksek çıksa bile sağlam olabilir. Karar vermeden önce inşaat
-      mühendisine danışın.
+      Hesap; zemin sertliği, faya uzaklık, yapım dönemi ve kat sayısı üzerinden kaba bir gösterge üretir. Binanın taşıyıcı sistemi, malzeme kalitesi, zemin etüdü ve yapılan tadilatlar bu hesapta yoktur — ve bunlar çoğu zaman belirleyici olandır.
     </p>
     <div class="baglar">
       <a href="harita.html">Harita</a>
