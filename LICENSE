@@ -1,0 +1,45 @@
+MIT License
+
+Copyright (c) 2026 ssilistre
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+NOTE ON DATA / VERİ HAKKINDA NOT
+
+The MIT terms above cover the source code in this repository only.
+
+They do NOT relicense the third-party datasets that this project downloads,
+derives from, or embeds. Those remain under their own terms, and anyone
+redistributing them must comply with the original licences:
+
+  - USGS Global Vs30 Mosaic — U.S. Geological Survey
+  - USGS FDSN earthquake catalogue — U.S. Geological Survey
+  - Türkiye diri fay verisi (tr_faults_imp)
+  - İstanbul Büyükşehir Belediyesi açık veri portalı
+    (deprem senaryosu sonuçları, yeşil alan envanteri, tesis kayıtları)
+  - OpenStreetMap — © OpenStreetMap contributors, ODbL
+
+Sources, download URLs and processing steps are documented in KAYNAKLAR.md.
+
+Yukarıdaki MIT koşulları yalnızca bu depodaki kaynak kodu kapsar. Projenin
+indirdiği, türettiği veya gömdüğü üçüncü taraf veri kümeleri kendi
+lisanslarına tabidir; yeniden dağıtan kişi özgün lisanslara uymakla
+yükümlüdür. Kaynaklar ve işleme adımları KAYNAKLAR.md içinde belgelidir.

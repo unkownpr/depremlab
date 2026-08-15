@@ -205,3 +205,15 @@ kaynaklarla güncel olduğunu doğrular.
 
 Bu uygulama üretime hazır değildir ve gerçek bir yapısal değerlendirme
 yapmaz.
+
+## Lisans
+
+Kaynak kod **MIT** lisanslıdır — bkz. `LICENSE`.
+
+Bu, projenin kullandığı üçüncü taraf veri kümelerini kapsamaz. USGS Vs30,
+USGS FDSN deprem kataloğu, Türkiye diri fay verisi, İBB açık veri portalı
+kayıtları ve OpenStreetMap kendi lisanslarına tabidir; yeniden dağıtırken
+özgün koşullara uymak gerekir. Kaynakların tam listesi, indirme adresleri ve
+işleme adımları `KAYNAKLAR.md` içindedir.
+
+OpenStreetMap verisi © OpenStreetMap katkıcıları, ODbL.
