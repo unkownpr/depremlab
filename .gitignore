@@ -7,3 +7,7 @@ __pycache__/
 
 node_modules/
 tests/shots/
+
+# Tanıtım videosu çıktısı — `npm run render` ile yeniden üretilir.
+# Kareler (promo/public/shots) depoda: hem videonun girdisi hem README görselleri.
+promo/out/

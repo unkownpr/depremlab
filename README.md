@@ -2,6 +2,8 @@
 
 Depreme hazırlık veri ile değil, eylemle başlar.
 
+![Deprem Rehberim ana ekranı](promo/public/shots/01-hero.png)
+
 İstanbul için deprem hazırlığı değerlendirme aracı. İki bağımsız modül ve
 bunları birleştiren bir hazırlık planı sunar:
 
@@ -75,6 +77,36 @@ bir değerlendirme servisiyle değiştirilmek üzere izole tutulmuştur.
 
 Önceki sürümdeki 0–100 risk skoru, `SEVIYELER` bantları ve puan tabanlı
 zemin/fay/kat ağırlıklandırması kaldırılmıştır.
+
+## Ekran görüntüleri
+
+| | |
+|---|---|
+| ![Bölgesel bağlam](promo/public/shots/04-bolgesel.png) | ![Bina raporu](promo/public/shots/05-bina-raporu.png) |
+| Bölgesel bağlam — ilçe ölçeğinde zemin, fay ve açık alan. Yapısal sonucu etkilemez. | Bina raporu — skor yerine sonraki adım; yöntemin sınırları hemen altında. |
+| ![Ev raporu](promo/public/shots/07-ev-raporu.png) | ![Hazırlık planı](promo/public/shots/08-plan.png) |
+| Ev raporu — tamamlanmayan önlemler aciliyete göre sıralı. | Hazırlık planı — iki modülün birleşimi, tek modülle de çalışır. |
+
+Kareler `node promo/capture.mjs` ile yeniden üretilir; akışı yürütüp her
+duraktan retina çözünürlükte görüntü alır.
+
+## Tanıtım videosu
+
+`promo/` altında Remotion ile yazılmış 40 saniyelik bir tanıtım vardır. Ekran
+görüntülerini girdi olarak kullanır, uygulamanın kendi paletini ve yazı tipini
+(Open Sans) taşır. Fontlar `promo/public/fonts` altında yereldir; render ağa
+çıkmaz.
+
+```bash
+cd promo
+npm install
+node capture.mjs      # ekran görüntülerini tazele (istenirse)
+npm run studio        # önizleme
+npm run render        # -> promo/out/deprem-rehberim.mp4
+```
+
+Remotion'un kendi lisans koşulları vardır; belirli bir takım büyüklüğünün
+üzerindeki şirketler için ücretlidir. Bkz. [remotion.dev/license](https://remotion.dev/license).
 
 ## Çalıştırma
 
